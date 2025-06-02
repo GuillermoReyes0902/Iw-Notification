@@ -3,11 +3,10 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
-  win_toast
 )
 
 list(APPEND FLUTTER_FFI_PLUGIN_LIST
-  mixin_logger
+  flutter_local_notifications_windows
 )
 
 set(PLUGIN_BUNDLED_LIBRARIES)
