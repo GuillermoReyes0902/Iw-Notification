@@ -49,7 +49,7 @@ class _MainPageState extends State<MainPage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             TextButton(
-              onPressed: LocalNotificationHandler.showNotification,
+              onPressed: () => LocalNotificationHandler.showNotification("Body simple"),
               child: const Text("Notificación simple"),
             ),
             TextButton(

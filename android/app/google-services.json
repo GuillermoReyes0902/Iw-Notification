@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "721093293596",
+    "firebase_url": "https://iw-reminder-default-rtdb.firebaseio.com",
+    "project_id": "iw-reminder",
+    "storage_bucket": "iw-reminder.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:721093293596:android:9032e157b0324e530211d9",
+        "android_client_info": {
+          "package_name": "com.iwlabs.reminder"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCVt7RDgrIIeYXi6WrBXYLMHp7BnFVNCDU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

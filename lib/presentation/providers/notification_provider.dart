@@ -9,4 +9,8 @@ class NotificationProvider with ChangeNotifier {
     _notifications.add(notification);
     notifyListeners();
   }
+
+  final formKey = GlobalKey<FormState>();
+  TextEditingController emisorCtrl = TextEditingController();
+  TextEditingController contenidoCtrl = TextEditingController();
 }
