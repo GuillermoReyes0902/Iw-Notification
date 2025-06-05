@@ -1,4 +1,4 @@
-package com.example.iwproject
+package com.iwlabs.reminder
 
 import io.flutter.embedding.android.FlutterActivity
 

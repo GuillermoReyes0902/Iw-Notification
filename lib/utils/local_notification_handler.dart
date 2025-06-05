@@ -59,11 +59,11 @@ class LocalNotificationHandler {
     );
   }
 
-  static Future<void> showNotification() async {
+  static Future<void> showNotification(String message) async {
     await flutterLocalNotificationsPlugin.show(
       id++,
       'Título simple',
-      'Cuerpo simple',
+      message,
       const NotificationDetails(),
       payload: 'simple_notification',
     );
