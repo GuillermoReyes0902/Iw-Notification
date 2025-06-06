@@ -3,7 +3,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:iwproject/firebase_options.dart';
-import 'package:iwproject/presentation/pages/notifications_page.dart';
+import 'package:iwproject/presentation/pages/message_sender_screen.dart';
 //import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 //import 'package:path/path.dart' as p;
@@ -47,12 +47,6 @@ class MyApp extends StatelessWidget {
   const MyApp({super.key});
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home:
-          //MainPage()
-          NotificationsPage(),
-
-      //
-    );
+    return const MaterialApp(home: MessageSenderScreen());
   }
 }
