@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 final StreamController<NotificationResponse> selectNotificationStream =
@@ -43,27 +42,16 @@ class LocalNotificationHandler {
   ];
 
   static Future<void> initializationSettings() async {
-    InitializationSettings initializationSettings;
-
-    if (Platform.isWindows) {
-      const windowsSettings = WindowsInitializationSettings(
+    InitializationSettings initializationSettings = InitializationSettings(
+      windows: WindowsInitializationSettings(
         appName: 'Max Dashboard',
         appUserModelId: 'com.max.dashboard',
         guid: '5ee60622-21da-4dd8-9c04-7010907c0985', // sin llaves
-      );
-
-      initializationSettings = const InitializationSettings(
-        windows: windowsSettings,
-      );
-    } else if (Platform.isMacOS) {
-      initializationSettings = InitializationSettings(
-        macOS: DarwinInitializationSettings(
-          notificationCategories: darwinNotificationCategories,
-        ),
-      );
-    } else {
-      initializationSettings = const InitializationSettings(); // Por si se ejecuta en otro OS
-    }
+      ),
+      macOS: DarwinInitializationSettings(
+        notificationCategories: darwinNotificationCategories,
+      ),
+    );
 
     await flutterLocalNotificationsPlugin.initialize(
       initializationSettings,
@@ -72,11 +60,11 @@ class LocalNotificationHandler {
     );
   }
 
-  static Future<void> showNotification(String message) async {
+  static Future<void> showNotification(String title, String body) async {
     await flutterLocalNotificationsPlugin.show(
       id++,
-      'Título simple',
-      message,
+      title,
+      body,
       const NotificationDetails(),
       payload: 'simple_notification',
     );
