@@ -1,16 +1,13 @@
 import 'dart:async';
-
+import 'dart:io';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
-// Stream global para respuestas de notificaciones
 final StreamController<NotificationResponse> selectNotificationStream =
     StreamController<NotificationResponse>.broadcast();
 
-// Instancia global del plugin
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
     FlutterLocalNotificationsPlugin();
 
-// Variable global para incrementos
 int id = 0;
 
 class LocalNotificationHandler {
@@ -46,16 +43,32 @@ class LocalNotificationHandler {
   ];
 
   static Future<void> initializationSettings() async {
-    final initializationSettings = InitializationSettings(
-      macOS: DarwinInitializationSettings(
-        notificationCategories: darwinNotificationCategories,
-      ),
-    );
+    InitializationSettings initializationSettings;
+
+    if (Platform.isWindows) {
+      const windowsSettings = WindowsInitializationSettings(
+        appName: 'Max Dashboard',
+        appUserModelId: 'com.max.dashboard',
+        guid: '5ee60622-21da-4dd8-9c04-7010907c0985', // sin llaves
+      );
+
+      initializationSettings = const InitializationSettings(
+        windows: windowsSettings,
+      );
+    } else if (Platform.isMacOS) {
+      initializationSettings = InitializationSettings(
+        macOS: DarwinInitializationSettings(
+          notificationCategories: darwinNotificationCategories,
+        ),
+      );
+    } else {
+      initializationSettings = const InitializationSettings(); // Por si se ejecuta en otro OS
+    }
 
     await flutterLocalNotificationsPlugin.initialize(
       initializationSettings,
       onDidReceiveNotificationResponse: selectNotificationStream.add,
-      //TODO onDidReceiveBackgroundNotificationResponse
+      // TODO: Puedes agregar onDidReceiveBackgroundNotificationResponse aquí si lo usas
     );
   }
 
