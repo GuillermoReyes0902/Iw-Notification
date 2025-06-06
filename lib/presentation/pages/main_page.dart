@@ -4,6 +4,7 @@ import 'package:iwproject/domain/models/notification_model.dart';
 import 'package:iwproject/presentation/providers/notification_provider.dart';
 import 'package:iwproject/utils/local_notification_handler.dart';
 import 'package:provider/provider.dart';
+import 'package:iwproject/presentation/pages/view_test.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -65,6 +66,15 @@ class _MainPageState extends State<MainPage> {
             TextButton(
               onPressed: LocalNotificationHandler.cancelNotification,
               child: const Text("Cancelar última notificación"),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const MessageSenderScreen()),
+                );
+              },
+              child: const Text("Navegar"),
             ),
             Padding(
               padding: EdgeInsets.symmetric(vertical: 20),
