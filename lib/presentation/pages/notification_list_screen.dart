@@ -1,6 +1,6 @@
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+//import 'package:intl/intl.dart';
 import 'package:iwproject/domain/models/reminder_model.dart';
 import 'package:iwproject/presentation/widgets/reminder_item.dart';
 
@@ -51,7 +51,7 @@ class NotificationListScreen extends StatelessWidget {
                           Icon(Icons.message_outlined, size: 20),
                           SizedBox(width: 8),
                           Text(
-                            "Mensajes Recibidos",
+                            "Recordatorios Recibidos",
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
@@ -108,13 +108,13 @@ class NotificationListScreen extends StatelessWidget {
                           }).toList();
 
                           reminders.sort((a, b) {
-                            final dateA = DateFormat(
-                              'dd/MM/yyyy',
-                            ).parse(a.date);
-                            final dateB = DateFormat(
-                              'dd/MM/yyyy',
-                            ).parse(b.date);
-                            return dateB.compareTo(dateA);
+                            // final dateA = DateFormat(
+                            //   'dd/MM/yyyy',
+                            // ).parse(a.date);
+                            // final dateB = DateFormat(
+                            //   'dd/MM/yyyy',
+                            // ).parse(b.date);
+                            return b.date.compareTo(a.date);
                           });
 
                           return Column(
@@ -122,8 +122,8 @@ class NotificationListScreen extends StatelessWidget {
                             children: [
                               Text(
                                 reminders.isEmpty
-                                    ? "No hay mensajes en tu bandeja de entrada"
-                                    : "Tienes ${reminders.length} mensajes en tu bandeja de entrada",
+                                    ? "No hay recordatorios en tu bandeja de entrada"
+                                    : "Tienes ${reminders.length} recordatorios en tu bandeja de entrada",
                                 style: const TextStyle(color: Colors.grey),
                               ),
                               const SizedBox(height: 8),

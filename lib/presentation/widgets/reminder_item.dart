@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+//import 'package:intl/intl.dart';
 import 'package:iwproject/domain/models/reminder_model.dart';
 
 class ReminderItem extends StatelessWidget {
@@ -13,18 +14,22 @@ class ReminderItem extends StatelessWidget {
 
   String formatDate(DateTime date) {
     final now = DateTime.now();
-    final diff = now.difference(date);
-    //TODO, TEMPORAL MIENTRAS AÑADIMOS HORA A "date"
-    if (diff.inDays < 1) {
+    final today = DateTime(now.year, now.month, now.day);
+    final other = DateTime(date.year, date.month, date.day);
+    final diffDays = today.difference(other).inDays;
+
+    if (diffDays == 0) {
       return 'Hoy';
-    }
-    //
-    if (diff.inMinutes < 60) {
-      return 'Hace ${diff.inMinutes} ${diff.inMinutes == 1 ? "minuto" : "minutos"}';
-    } else if (diff.inHours < 24) {
-      return 'Hace ${diff.inHours} ${diff.inHours == 1 ? "hora" : "horas"}';
+    } else if (diffDays == 1) {
+      return 'Ayer';
+    } else if (diffDays < 30) {
+      return 'Hace $diffDays días';
+    } else if (diffDays < 365) {
+      final months = (diffDays / 30).floor();
+      return 'Hace $months ${months == 1 ? "mes" : "meses"}';
     } else {
-      return 'Hace ${diff.inDays} ${diff.inDays == 1 ? "día" : "días"}';
+      final years = (diffDays / 365).floor();
+      return 'Hace $years ${years == 1 ? "año" : "años"}';
     }
   }
 
@@ -73,9 +78,7 @@ class ReminderItem extends StatelessWidget {
                           ),
                           const SizedBox(width: 4),
                           Text(
-                            formatDate(
-                              DateFormat('dd/MM/yyyy').parse(reminder.date),
-                            ),
+                            formatDate(reminder.date),
                             style: const TextStyle(
                               color: Colors.grey,
                               fontSize: 12,
@@ -84,7 +87,8 @@ class ReminderItem extends StatelessWidget {
                         ],
                       ),
                       Text(
-                        "\n${reminder.date}",
+                        "\n${DateFormat('dd/MM/yyyy\nhh:mm').format(reminder.date)}",
+                        textAlign: TextAlign.end,
                         style: const TextStyle(
                           color: Colors.grey,
                           fontSize: 12,

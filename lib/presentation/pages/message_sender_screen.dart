@@ -16,7 +16,6 @@ class MessageSenderScreen extends StatelessWidget {
   Future<void> saveReminder(BuildContext context) async {
     final controller = context.read<NotificationProvider>();
     await controller.saveReminder().then((value) {
-      print(value);
       if (value == true) {
         goToNotificationList(context);
       }

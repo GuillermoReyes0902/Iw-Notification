@@ -1,6 +1,5 @@
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:iwproject/utils/local_notification_handler.dart';
 
 class NotificationProvider with ChangeNotifier {
@@ -17,13 +16,15 @@ class NotificationProvider with ChangeNotifier {
       await reference.set({
         "name": emisorCtrl.text.trim(),
         "content": contenidoCtrl.text.trim(),
-        "date": DateFormat('dd/MM/yyyy').format(DateTime.now()),
+        "date": "${DateTime.now()}",
       });
       await LocalNotificationHandler.showNotification(
         emisorCtrl.text.trim(),
         contenidoCtrl.text.trim(),
       );
       formKey.currentState!.reset();
+      emisorCtrl.clear();
+      contenidoCtrl.clear();
       return true;
     }
     return false;

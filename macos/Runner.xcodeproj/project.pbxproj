@@ -30,6 +30,7 @@
 		33CC11132044BFA00003C045 /* MainFlutterWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33CC11122044BFA00003C045 /* MainFlutterWindow.swift */; };
 		54CD1FEA266439175F36BBE1 /* Pods_Runner.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B14F990981573466A549C65 /* Pods_Runner.framework */; };
 		8539876C4F29D3B0DF18F266 /* Pods_RunnerTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 887CB7D9AD53153C861A3C99 /* Pods_RunnerTests.framework */; };
+		9EC083B22DF76C8C006AA897 /* LaunchAtLogin in Frameworks */ = {isa = PBXBuildFile; productRef = 9EC083B12DF76C8C006AA897 /* LaunchAtLogin */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -105,6 +106,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9EC083B22DF76C8C006AA897 /* LaunchAtLogin in Frameworks */,
 				54CD1FEA266439175F36BBE1 /* Pods_Runner.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -244,6 +246,7 @@
 				3399D490228B24CF009A79C7 /* ShellScript */,
 				D7F48FB7C4F33DC846E67F34 /* [CP] Embed Pods Frameworks */,
 				7CCC7E5C8FB8E717DAE9D5B8 /* [CP] Copy Pods Resources */,
+				9EC083AF2DF76A12006AA897 /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -295,6 +298,9 @@
 				Base,
 			);
 			mainGroup = 33CC10E42044A3C60003C045;
+			packageReferences = (
+				9EC083AE2DF7698D006AA897 /* XCRemoteSwiftPackageReference "LaunchAtLogin-Legacy" */,
+			);
 			productRefGroup = 33CC10EE2044A3C60003C045 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -403,6 +409,24 @@
 			shellPath = /bin/sh;
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-resources.sh\"\n";
 			showEnvVarsInLog = 0;
+		};
+		9EC083AF2DF76A12006AA897 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${BUILT_PRODUCTS_DIR}/LaunchAtLogin_LaunchAtLogin.bundle/Contents/Resources/copy-helper-swiftpm.sh\"\n";
 		};
 		D7F48FB7C4F33DC846E67F34 /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -823,6 +847,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		9EC083AE2DF7698D006AA897 /* XCRemoteSwiftPackageReference "LaunchAtLogin-Legacy" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sindresorhus/LaunchAtLogin-Legacy";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		9EC083B12DF76C8C006AA897 /* LaunchAtLogin */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 9EC083AE2DF7698D006AA897 /* XCRemoteSwiftPackageReference "LaunchAtLogin-Legacy" */;
+			productName = LaunchAtLogin;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 33CC10E52044A3C60003C045 /* Project object */;
 }

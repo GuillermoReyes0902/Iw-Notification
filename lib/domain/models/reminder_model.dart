@@ -1,7 +1,7 @@
 class ReminderModel {
   String id;
   String name;
-  String date;
+  DateTime date;
   String content;
 
   ReminderModel({
@@ -14,7 +14,7 @@ class ReminderModel {
   factory ReminderModel.fromJson(Map<String, dynamic> json) => ReminderModel(
     id: json["id"],
     name: json["name"],
-    date: json["date"],
+    date: DateTime.parse(json["date"]),
     content: json["content"],
   );
 
