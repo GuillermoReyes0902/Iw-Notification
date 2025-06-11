@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 //import 'package:intl/intl.dart';
 import 'package:iwproject/domain/models/reminder_model.dart';
+import 'package:iwproject/presentation/providers/notification_provider.dart';
+import 'package:provider/provider.dart';
 
 class ReminderItem extends StatelessWidget {
   const ReminderItem({
@@ -57,12 +59,16 @@ class ReminderItem extends StatelessWidget {
                         color: Colors.grey,
                       ),
                       const SizedBox(width: 6),
-                      Text(
-                        reminder.name,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w600,
-                          color: Colors.black87,
-                        ),
+                      Consumer<NotificationProvider>(
+                        builder: (context, controller, _) {
+                          return Text(
+                            "De: ${controller.users.where((user) => user.id == reminder.senderId).first.name}\nPara: ${controller.users.where((user) => user.id == reminder.receiverId).first.name}",
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black87,
+                            ),
+                          );
+                        },
                       ),
                     ],
                   ),
@@ -94,6 +100,7 @@ class ReminderItem extends StatelessWidget {
                           fontSize: 12,
                         ),
                       ),
+                      //TODO falta widget para marcar completado
                     ],
                   ),
                 ],
