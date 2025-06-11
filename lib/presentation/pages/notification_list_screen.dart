@@ -1,34 +1,44 @@
-import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
-//import 'package:intl/intl.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:iwproject/domain/models/reminder_model.dart';
+import 'package:iwproject/presentation/pages/message_sender_screen.dart';
 import 'package:iwproject/presentation/widgets/reminder_item.dart';
+import 'package:iwproject/presentation/widgets/users_list.dart';
 
 class NotificationListScreen extends StatelessWidget {
   const NotificationListScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final ref = FirebaseDatabase.instance.ref().child('reminders');
+    final reminders = FirebaseFirestore.instance.collection('reminders');
+
     return Scaffold(
       backgroundColor: const Color(0xFFF9FAFB),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         automaticallyImplyLeading: false,
-        leading: SizedBox(
-          child: TextButton.icon(
-            onPressed: () {
-              Navigator.pop(context);
-            },
-            icon: const Icon(Icons.arrow_back, size: 16),
-            label: const Text("Volver a enviar"),
-            style: OutlinedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 16, top: 8),
+            child: ElevatedButton.icon(
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const MessageSenderScreen(),
+                ),
+              ),
+              icon: const Icon(Icons.send, size: 18),
+              label: const Text("Nuevo recordatorio"),
+              style: ElevatedButton.styleFrom(
+                foregroundColor: Colors.black87,
+                backgroundColor: Colors.white,
+                side: const BorderSide(color: Colors.grey),
+                elevation: 0,
+              ),
             ),
           ),
-        ),
-        leadingWidth: 150,
+        ],
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -60,8 +70,11 @@ class NotificationListScreen extends StatelessWidget {
                         ],
                       ),
                       const SizedBox(height: 8),
-                      StreamBuilder<DatabaseEvent>(
-                        stream: ref.onValue,
+                      //TODO CREAR FILTRO
+                      UsersList(),
+                      // StreamBuilder para Firestore
+                      StreamBuilder<QuerySnapshot>(
+                        stream: reminders.snapshots(),
                         builder: (context, snapshot) {
                           if (snapshot.hasError) {
                             return Text(
@@ -72,62 +85,41 @@ class NotificationListScreen extends StatelessWidget {
 
                           if (snapshot.connectionState ==
                               ConnectionState.waiting) {
-                            return Padding(
-                              padding: EdgeInsetsGeometry.symmetric(
-                                vertical: 20,
-                              ),
+                            return const Padding(
+                              padding: EdgeInsets.symmetric(vertical: 20),
                               child: CircularProgressIndicator(),
                             );
                           }
 
-                          if (!snapshot.hasData ||
-                              snapshot.data!.snapshot.value == null) {
-                            return Text(
+                          final docs = snapshot.data?.docs ?? [];
+
+                          if (docs.isEmpty) {
+                            return const Text(
                               "No hay recordatorios en tu bandeja de entrada",
-                              style: const TextStyle(color: Colors.grey),
+                              style: TextStyle(color: Colors.grey),
                             );
                           }
 
-                          final data = snapshot.data!.snapshot.value;
-
-                          Map<dynamic, dynamic> remindersMap =
-                              data as Map<dynamic, dynamic>;
-
-                          final reminders = remindersMap.entries.map((entry) {
-                            final key = entry
-                                .key; // Esta es la key del nodo en Firebase
-                            final value = Map<String, dynamic>.from(
-                              entry.value,
-                            );
-
-                            // Asignamos manualmente el id al objeto ReminderModel
+                          final reminders = docs.map((doc) {
+                            final data = doc.data() as Map<String, dynamic>;
                             return ReminderModel.fromJson({
-                              'id': key,
-                              ...value,
+                              'id': doc.id,
+                              ...data,
                             });
                           }).toList();
 
-                          reminders.sort((a, b) {
-                            // final dateA = DateFormat(
-                            //   'dd/MM/yyyy',
-                            // ).parse(a.date);
-                            // final dateB = DateFormat(
-                            //   'dd/MM/yyyy',
-                            // ).parse(b.date);
-                            return b.date.compareTo(a.date);
-                          });
+                          reminders.sort((a, b) => b.date.compareTo(a.date));
 
                           return Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                reminders.isEmpty
-                                    ? "No hay recordatorios en tu bandeja de entrada"
-                                    : "Tienes ${reminders.length} recordatorios en tu bandeja de entrada",
+                                "Hay ${reminders.length} recordatorios en la bandeja de entrada",
                                 style: const TextStyle(color: Colors.grey),
                               ),
                               const SizedBox(height: 8),
                               ListView.builder(
+                                physics: const NeverScrollableScrollPhysics(),
                                 padding: EdgeInsets.zero,
                                 shrinkWrap: true,
                                 itemCount: reminders.length,
@@ -136,7 +128,7 @@ class NotificationListScreen extends StatelessWidget {
                                   return ReminderItem(
                                     reminder: reminder,
                                     isLastReminder:
-                                        (index < reminders.length - 1),
+                                        index < reminders.length - 1,
                                   );
                                 },
                               ),

@@ -1,22 +1,21 @@
 import 'package:flutter/material.dart';
-import 'package:iwproject/presentation/pages/notification_list_screen.dart';
 import 'package:iwproject/presentation/providers/notification_provider.dart';
+import 'package:iwproject/presentation/widgets/users_list.dart';
 import 'package:provider/provider.dart';
 
 class MessageSenderScreen extends StatelessWidget {
   const MessageSenderScreen({super.key});
 
   void goToNotificationList(BuildContext context) async {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const NotificationListScreen()),
-    );
+    Navigator.pop(context);
   }
 
   Future<void> saveReminder(BuildContext context) async {
+    FocusScope.of(context).unfocus();
     final controller = context.read<NotificationProvider>();
     await controller.saveReminder().then((value) {
       if (value == true) {
+        if (!context.mounted) return;
         goToNotificationList(context);
       }
     });
@@ -30,22 +29,17 @@ class MessageSenderScreen extends StatelessWidget {
         backgroundColor: Colors.transparent,
         elevation: 0,
         automaticallyImplyLeading: false,
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 16, top: 8),
-            child: ElevatedButton.icon(
-              onPressed: () => goToNotificationList(context),
-              icon: const Icon(Icons.inbox, size: 18),
-              label: const Text("Ver recordatorios"),
-              style: ElevatedButton.styleFrom(
-                foregroundColor: Colors.black87,
-                backgroundColor: Colors.white,
-                side: const BorderSide(color: Colors.grey),
-                elevation: 0,
-              ),
-            ),
+        leading: TextButton.icon(
+          onPressed: () => goToNotificationList(context),
+          icon: const Icon(Icons.arrow_back_ios, size: 18),
+          label: const Text("Ver recordatorios"),
+          style: ElevatedButton.styleFrom(
+            foregroundColor: Colors.black87,
+            backgroundColor: Colors.white,
+            elevation: 0,
           ),
-        ],
+        ),
+        leadingWidth: 200,
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -91,28 +85,19 @@ class MessageSenderScreen extends StatelessWidget {
                               children: [
                                 // Remitente
                                 const Text(
-                                  'Remitente',
+                                  'Seleccionar Remitente',
                                   style: TextStyle(fontWeight: FontWeight.w600),
                                 ),
+                                //TODO CREAR DROPDOWN REMITENTE
+                                UsersList(),
                                 const SizedBox(height: 8),
-                                TextFormField(
-                                  controller: controller.emisorCtrl,
-                                  decoration: InputDecoration(
-                                    prefixIcon: const Icon(
-                                      Icons.person_outline,
-                                    ),
-                                    hintText: 'Ingresa tu nombre',
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                  ),
-                                  validator: (value) =>
-                                      value == "" || value == null
-                                      ? "Remitente vacío"
-                                      : null,
+                                const Text(
+                                  'Seleccionar Destinatario',
+                                  style: TextStyle(fontWeight: FontWeight.w600),
                                 ),
-                                const SizedBox(height: 24),
-
+                                //TODO CREAR DROPDOWN DESTINATARIO
+                                UsersList(),
+                                const SizedBox(height: 8),
                                 // Contenido
                                 const Text(
                                   'Contenido del recordatorio',

@@ -51,12 +51,14 @@ class LocalNotificationHandler {
       macOS: DarwinInitializationSettings(
         notificationCategories: darwinNotificationCategories,
       ),
+      iOS: DarwinInitializationSettings(
+        notificationCategories: darwinNotificationCategories,
+      ),
     );
 
     await flutterLocalNotificationsPlugin.initialize(
       initializationSettings,
       onDidReceiveNotificationResponse: selectNotificationStream.add,
-      // TODO: Puedes agregar onDidReceiveBackgroundNotificationResponse aquí si lo usas
     );
   }
 

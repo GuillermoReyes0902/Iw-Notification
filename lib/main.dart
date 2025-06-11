@@ -1,26 +1,21 @@
 import 'dart:io';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:iwproject/domain/models/user_model.dart';
 import 'package:iwproject/firebase_options.dart';
-import 'package:iwproject/presentation/pages/message_sender_screen.dart';
-//import 'package:path_provider/path_provider.dart';
+import 'package:iwproject/presentation/pages/notification_list_screen.dart';
 import 'package:provider/provider.dart';
-//import 'package:path/path.dart' as p;
-//import 'presentation/pages/main_page.dart';
 import 'presentation/providers/notification_provider.dart';
-import 'utils/local_notification_handler.dart';
 import 'package:launch_at_startup/launch_at_startup.dart';
+// import 'package:firebase_messaging/firebase_messaging.dart';
+// import 'utils/local_notification_handler.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  // final dir = await getApplicationDocumentsDirectory();
-  // final logPath = p.join(dir.path, 'log');
-  // debugPrint('logPath: $logPath');
 
   FirebaseApp app = await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
@@ -31,14 +26,18 @@ void main() async {
     databaseURL: DefaultFirebaseOptions.currentPlatform.databaseURL!,
   );
 
-  await LocalNotificationHandler.initializationSettings();
+  //await LocalNotificationHandler.initializationSettings();
 
   if (kIsWeb) {
     // Lógica para web
-    _fcmInit();
+    //_fcmInit();
   } else {
+    if (!Platform.isWindows) {
+      //Inicializa FCM en todas las plataformas que no sean windows
+      //_fcmInit();
+    }
     if (Platform.isMacOS) {
-      _fcmInit();
+      //Solo para macOS
       _launchAtStartupInit();
     }
   }
@@ -53,11 +52,11 @@ void main() async {
   );
 }
 
-_fcmInit() async {
-  await FirebaseMessaging.instance.requestPermission();
-  String? token = await FirebaseMessaging.instance.getToken();
-  print('🔑 Token FCM: $token');
-}
+// _fcmInit() async {
+//   await FirebaseMessaging.instance.requestPermission();
+//   String? token = await FirebaseMessaging.instance.getToken();
+//   print('🔑 Token FCM: $token');
+// }
 
 _launchAtStartupInit() async {
   launchAtStartup.setup(
@@ -67,13 +66,34 @@ _launchAtStartupInit() async {
     packageName: 'com.iwlabs.reminder',
   );
   await launchAtStartup.enable();
-  print(await launchAtStartup.isEnabled());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  @override
+  void initState() {
+    final users = FirebaseFirestore.instance.collection('users');
+    final controller = context.read<NotificationProvider>();
+
+    users.get().then((querySnapshot) {
+      final users = querySnapshot.docs.map((doc) {
+        final data = doc.data();
+        return UserModel.fromJson({'id': doc.id, ...data});
+      }).toList();
+
+      controller.setUsers(users);
+    });
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(home: MessageSenderScreen());
+    return const MaterialApp(home: NotificationListScreen());
   }
 }
