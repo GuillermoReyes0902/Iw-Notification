@@ -2,14 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:iwproject/domain/models/reminder_model.dart';
 import 'package:iwproject/presentation/pages/message_sender_screen.dart';
+//import 'package:iwproject/presentation/providers/reminder_listener_provider.dart';
 import 'package:iwproject/presentation/widgets/reminder_item.dart';
 import 'package:iwproject/presentation/widgets/users_list.dart';
+//import 'package:provider/provider.dart';
 
 class NotificationListScreen extends StatelessWidget {
   const NotificationListScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    // final listener = context.read<ReminderListenerProvider>();
+    // listener.setCurrentScreen('NotificationList');
+    // listener.startListening(context);
+
     final reminders = FirebaseFirestore.instance.collection('reminders');
 
     return Scaffold(
