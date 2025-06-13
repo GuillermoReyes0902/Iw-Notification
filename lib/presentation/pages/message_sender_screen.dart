@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:iwproject/presentation/providers/notification_provider.dart';
+//import 'package:iwproject/presentation/providers/reminder_listener_provider.dart';
 import 'package:iwproject/presentation/widgets/users_list.dart';
 import 'package:provider/provider.dart';
 
@@ -23,6 +24,9 @@ class MessageSenderScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // final listener = context.read<ReminderListenerProvider>();
+    // listener.setCurrentScreen('MessageSender');
+    // listener.startListening(context);
     return Scaffold(
       backgroundColor: const Color(0xFFF9FAFB),
       appBar: AppBar(

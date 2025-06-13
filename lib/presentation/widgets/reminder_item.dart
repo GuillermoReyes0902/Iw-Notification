@@ -64,12 +64,14 @@ class ReminderItem extends StatelessWidget {
                       const SizedBox(width: 6),
                       Consumer<NotificationProvider>(
                         builder: (context, controller, _) {
+
                           final sender = controller.users.firstWhere((user) => user.id == reminder.senderId);
                           final receiver = controller.users.firstWhere((user) => user.id == reminder.receiverId);
 
                           return Text(
                             "De: ${sender.name}\nPara: ${receiver.name}",
                             style: const TextStyle(fontWeight: FontWeight.w600, color: Colors.black87),
+
                           );
                         },
                       ),

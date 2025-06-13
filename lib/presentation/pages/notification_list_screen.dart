@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:iwproject/domain/models/reminder_model.dart';
 import 'package:iwproject/presentation/pages/message_sender_screen.dart';
+//import 'package:iwproject/presentation/providers/reminder_listener_provider.dart';
 import 'package:iwproject/presentation/widgets/reminder_item.dart';
 import 'package:iwproject/presentation/widgets/users_list.dart';
+//import 'package:provider/provider.dart';
 import 'package:iwproject/domain/models/user_model.dart';
+
 
 class NotificationListScreen extends StatefulWidget {
   const NotificationListScreen({super.key});
@@ -18,9 +21,16 @@ class _NotificationListScreenState extends State<NotificationListScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // final listener = context.read<ReminderListenerProvider>();
+    // listener.setCurrentScreen('NotificationList');
+    // listener.startListening(context);
+
+    final reminders = FirebaseFirestore.instance.collection('reminders');
+
     final reminders = FirebaseFirestore.instance
         .collection('reminders')
         .where('receiverId', isEqualTo: selectedUser?.id);
+
 
     return Scaffold(
       backgroundColor: const Color(0xFFF9FAFB),
