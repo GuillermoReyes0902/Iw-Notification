@@ -4,13 +4,23 @@ import 'package:iwproject/domain/models/reminder_model.dart';
 import 'package:iwproject/presentation/pages/message_sender_screen.dart';
 import 'package:iwproject/presentation/widgets/reminder_item.dart';
 import 'package:iwproject/presentation/widgets/users_list.dart';
+import 'package:iwproject/domain/models/user_model.dart';
 
-class NotificationListScreen extends StatelessWidget {
+class NotificationListScreen extends StatefulWidget {
   const NotificationListScreen({super.key});
 
   @override
+  State<NotificationListScreen> createState() => _NotificationListScreenState();
+}
+
+class _NotificationListScreenState extends State<NotificationListScreen> {
+  UserModel? selectedUser;
+
+  @override
   Widget build(BuildContext context) {
-    final reminders = FirebaseFirestore.instance.collection('reminders');
+    final reminders = FirebaseFirestore.instance
+        .collection('reminders')
+        .where('receiverId', isEqualTo: selectedUser?.id);
 
     return Scaffold(
       backgroundColor: const Color(0xFFF9FAFB),
@@ -70,11 +80,24 @@ class NotificationListScreen extends StatelessWidget {
                         ],
                       ),
                       const SizedBox(height: 8),
-                      //TODO CREAR FILTRO
-                      UsersList(),
-                      // StreamBuilder para Firestore
+
+                      /// Dropdown para filtrar
+                      UsersList(
+                        selectedUser: selectedUser,
+                        onChanged: (user) {
+                          setState(() {
+                            selectedUser = user;
+                          });
+                        },
+                        hint: 'un usuario',
+                        showAllOption: true, 
+                      ),
+
+                      const SizedBox(height: 16),
                       StreamBuilder<QuerySnapshot>(
-                        stream: reminders.snapshots(),
+                        stream: selectedUser == null
+                            ? FirebaseFirestore.instance.collection('reminders').snapshots()
+                            : reminders.snapshots(), 
                         builder: (context, snapshot) {
                           if (snapshot.hasError) {
                             return Text(
@@ -83,8 +106,7 @@ class NotificationListScreen extends StatelessWidget {
                             );
                           }
 
-                          if (snapshot.connectionState ==
-                              ConnectionState.waiting) {
+                          if (snapshot.connectionState == ConnectionState.waiting) {
                             return const Padding(
                               padding: EdgeInsets.symmetric(vertical: 20),
                               child: CircularProgressIndicator(),
@@ -95,7 +117,7 @@ class NotificationListScreen extends StatelessWidget {
 
                           if (docs.isEmpty) {
                             return const Text(
-                              "No hay recordatorios en tu bandeja de entrada",
+                              "No hay recordatorios para el usuario seleccionado",
                               style: TextStyle(color: Colors.grey),
                             );
                           }
@@ -114,7 +136,7 @@ class NotificationListScreen extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                "Hay ${reminders.length} recordatorios en la bandeja de entrada",
+                                "Hay ${reminders.length} recordatorios",
                                 style: const TextStyle(color: Colors.grey),
                               ),
                               const SizedBox(height: 8),
@@ -127,8 +149,7 @@ class NotificationListScreen extends StatelessWidget {
                                   final reminder = reminders[index];
                                   return ReminderItem(
                                     reminder: reminder,
-                                    isLastReminder:
-                                        index < reminders.length - 1,
+                                    isLastReminder: index < reminders.length - 1,
                                   );
                                 },
                               ),
@@ -147,3 +168,4 @@ class NotificationListScreen extends StatelessWidget {
     );
   }
 }
+

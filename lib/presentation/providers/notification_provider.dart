@@ -20,12 +20,17 @@ class NotificationProvider with ChangeNotifier {
         // Cloud Firestore
         final remindersRef = FirebaseFirestore.instance.collection('reminders');
         await remindersRef.add({
-          //TODO añadir los otros campos
           "content": contenidoCtrl.text.trim(),
           "date": DateTime.now().toIso8601String(),
+          "senderId": selectedSender?.id ?? '',
+          "receiverId": selectedReceiver?.id ?? '',
+          "completed": false,
         });
         formKey.currentState!.reset();
         contenidoCtrl.clear();
+        selectedSender = null;
+        selectedReceiver = null;
+        notifyListeners();
         return true;
       } catch (e) {
         debugPrint("Error al guardar recordatorio: $e");
@@ -33,5 +38,18 @@ class NotificationProvider with ChangeNotifier {
       }
     }
     return false;
+  }
+
+  UserModel? selectedSender;
+  UserModel? selectedReceiver;
+
+  void setSender(UserModel? user) {
+    selectedSender = user;
+    notifyListeners();
+  }
+
+  void setReceiver(UserModel? user) {
+    selectedReceiver = user;
+    notifyListeners();
   }
 }
