@@ -1,7 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:iwproject/domain/models/reminder_model.dart';
 import 'package:iwproject/domain/models/user_model.dart';
-//import 'package:iwproject/utils/local_notification_handler.dart';
+import 'package:iwproject/utils/text_data.dart';
 
 class NotificationProvider with ChangeNotifier {
   final formKey = GlobalKey<FormState>();
@@ -18,14 +19,18 @@ class NotificationProvider with ChangeNotifier {
     if (formKey.currentState!.validate()) {
       try {
         // Cloud Firestore
-        final remindersRef = FirebaseFirestore.instance.collection('reminders');
-        await remindersRef.add({
-          "content": contenidoCtrl.text.trim(),
-          "date": DateTime.now().toIso8601String(),
-          "senderId": selectedSender?.id ?? '',
-          "receiverId": selectedReceiver?.id ?? '',
-          "completed": false,
-        });
+        final remindersRef = FirebaseFirestore.instance.collection(
+          ConstantData.reminderCollection,
+        );
+        await remindersRef.add(
+          ReminderModel(
+            date: DateTime.now(),
+            content: contenidoCtrl.text.trim(),
+            senderId: selectedSender?.id ?? '',
+            receiverId: selectedReceiver?.id ?? '',
+            completed: false,
+          ).toJson(),
+        );
         formKey.currentState!.reset();
         contenidoCtrl.clear();
         selectedSender = null;
@@ -42,9 +47,15 @@ class NotificationProvider with ChangeNotifier {
 
   UserModel? selectedSender;
   UserModel? selectedReceiver;
+  UserModel? selectedReceiverMainList;
 
   void setSender(UserModel? user) {
     selectedSender = user;
+    notifyListeners();
+  }
+
+  void setMainListReceiver(UserModel? user) {
+    selectedReceiverMainList = user;
     notifyListeners();
   }
 

@@ -1,5 +1,7 @@
+import 'package:iwproject/utils/text_data.dart';
+
 class ReminderModel {
-  String id;
+  String? id;
   DateTime date;
   String content;
   String senderId;
@@ -7,7 +9,7 @@ class ReminderModel {
   bool completed;
 
   ReminderModel({
-    required this.id,
+    this.id,
     required this.date,
     required this.content,
     required this.senderId,
@@ -16,11 +18,21 @@ class ReminderModel {
   });
 
   factory ReminderModel.fromJson(Map<String, dynamic> json) => ReminderModel(
-    id: json['id'] ?? '',
-    date: DateTime.tryParse(json['date'] ?? '') ?? DateTime.now(),
-    content: json['content'] ?? '',
-    senderId: json['senderId'] ?? '',
-    receiverId: json['receiverId'] ?? '',
-    completed: json['completed'] ?? false,
+    id: json[ConstantData.reminderId] ?? '',
+    date:
+        DateTime.tryParse(json[ConstantData.reminderDate] ?? '') ??
+        DateTime.now(),
+    content: json[ConstantData.reminderContent] ?? '',
+    senderId: json[ConstantData.reminderSenderId] ?? '',
+    receiverId: json[ConstantData.reminderReceiverId] ?? '',
+    completed: json[ConstantData.reminderCompleted] ?? false,
   );
+
+  Map<String, dynamic> toJson() => {
+    ConstantData.reminderDate: date.toIso8601String(),
+    ConstantData.reminderContent: content,
+    ConstantData.reminderSenderId: senderId,
+    ConstantData.reminderReceiverId: receiverId,
+    ConstantData.reminderCompleted: completed,
+  };
 }

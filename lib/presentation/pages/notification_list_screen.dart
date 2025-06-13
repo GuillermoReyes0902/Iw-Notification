@@ -1,36 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:iwproject/domain/models/reminder_model.dart';
+import 'package:iwproject/domain/models/user_model.dart';
 import 'package:iwproject/presentation/pages/message_sender_screen.dart';
+import 'package:iwproject/presentation/providers/notification_provider.dart';
 //import 'package:iwproject/presentation/providers/reminder_listener_provider.dart';
 import 'package:iwproject/presentation/widgets/reminder_item.dart';
-import 'package:iwproject/presentation/widgets/users_list.dart';
+import 'package:iwproject/presentation/widgets/users_dropdown.dart';
 //import 'package:provider/provider.dart';
-import 'package:iwproject/domain/models/user_model.dart';
+import 'package:iwproject/utils/text_data.dart';
+import 'package:provider/provider.dart';
 
-
-class NotificationListScreen extends StatefulWidget {
+class NotificationListScreen extends StatelessWidget {
   const NotificationListScreen({super.key});
-
-  @override
-  State<NotificationListScreen> createState() => _NotificationListScreenState();
-}
-
-class _NotificationListScreenState extends State<NotificationListScreen> {
-  UserModel? selectedUser;
 
   @override
   Widget build(BuildContext context) {
     // final listener = context.read<ReminderListenerProvider>();
     // listener.setCurrentScreen('NotificationList');
     // listener.startListening(context);
-
-    final reminders = FirebaseFirestore.instance.collection('reminders');
-
-    final reminders = FirebaseFirestore.instance
-        .collection('reminders')
-        .where('receiverId', isEqualTo: selectedUser?.id);
-
 
     return Scaffold(
       backgroundColor: const Color(0xFFF9FAFB),
@@ -49,7 +37,7 @@ class _NotificationListScreenState extends State<NotificationListScreen> {
                 ),
               ),
               icon: const Icon(Icons.send, size: 18),
-              label: const Text("Nuevo recordatorio"),
+              label: const Text(TextData.newReminderButton),
               style: ElevatedButton.styleFrom(
                 foregroundColor: Colors.black87,
                 backgroundColor: Colors.white,
@@ -81,7 +69,7 @@ class _NotificationListScreenState extends State<NotificationListScreen> {
                           Icon(Icons.message_outlined, size: 20),
                           SizedBox(width: 8),
                           Text(
-                            "Recordatorios Recibidos",
+                            TextData.messageListTitle,
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
@@ -92,78 +80,92 @@ class _NotificationListScreenState extends State<NotificationListScreen> {
                       const SizedBox(height: 8),
 
                       /// Dropdown para filtrar
-                      UsersList(
-                        selectedUser: selectedUser,
-                        onChanged: (user) {
-                          setState(() {
-                            selectedUser = user;
-                          });
-                        },
-                        hint: 'un usuario',
-                        showAllOption: true, 
-                      ),
+                      UsersDropDown(origin: DropDownOrigin.mainlist),
 
                       const SizedBox(height: 16),
-                      StreamBuilder<QuerySnapshot>(
-                        stream: selectedUser == null
-                            ? FirebaseFirestore.instance.collection('reminders').snapshots()
-                            : reminders.snapshots(), 
-                        builder: (context, snapshot) {
-                          if (snapshot.hasError) {
-                            return Text(
-                              'Error: ${snapshot.error}',
-                              style: const TextStyle(color: Colors.grey),
-                            );
-                          }
+                      Selector<NotificationProvider, UserModel?>(
+                        selector: (_, controller) =>
+                            controller.selectedReceiverMainList,
+                        builder: (_, selectedReceiverMainList, _) {
+                          return StreamBuilder<QuerySnapshot>(
+                            stream: selectedReceiverMainList == null
+                                ? FirebaseFirestore.instance
+                                      .collection(
+                                        ConstantData.reminderCollection,
+                                      )
+                                      .snapshots()
+                                : FirebaseFirestore.instance
+                                      .collection(
+                                        ConstantData.reminderCollection,
+                                      )
+                                      .where(
+                                        ConstantData.reminderReceiverId,
+                                        isEqualTo: selectedReceiverMainList.id,
+                                      )
+                                      .snapshots(),
+                            builder: (context, snapshot) {
+                              if (snapshot.hasError) {
+                                return Text(
+                                  'Error: ${snapshot.error}',
+                                  style: const TextStyle(color: Colors.grey),
+                                );
+                              }
 
-                          if (snapshot.connectionState == ConnectionState.waiting) {
-                            return const Padding(
-                              padding: EdgeInsets.symmetric(vertical: 20),
-                              child: CircularProgressIndicator(),
-                            );
-                          }
+                              if (snapshot.connectionState ==
+                                  ConnectionState.waiting) {
+                                return const Padding(
+                                  padding: EdgeInsets.symmetric(vertical: 20),
+                                  child: CircularProgressIndicator(),
+                                );
+                              }
 
-                          final docs = snapshot.data?.docs ?? [];
+                              final docs = snapshot.data?.docs ?? [];
 
-                          if (docs.isEmpty) {
-                            return const Text(
-                              "No hay recordatorios para el usuario seleccionado",
-                              style: TextStyle(color: Colors.grey),
-                            );
-                          }
+                              if (docs.isEmpty) {
+                                return const Text(
+                                  TextData.empptyReminders,
+                                  style: TextStyle(color: Colors.grey),
+                                );
+                              }
 
-                          final reminders = docs.map((doc) {
-                            final data = doc.data() as Map<String, dynamic>;
-                            return ReminderModel.fromJson({
-                              'id': doc.id,
-                              ...data,
-                            });
-                          }).toList();
+                              final reminders = docs.map((doc) {
+                                final data = doc.data() as Map<String, dynamic>;
+                                return ReminderModel.fromJson({
+                                  ConstantData.reminderId: doc.id,
+                                  ...data,
+                                });
+                              }).toList();
 
-                          reminders.sort((a, b) => b.date.compareTo(a.date));
+                              reminders.sort(
+                                (a, b) => b.date.compareTo(a.date),
+                              );
 
-                          return Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                "Hay ${reminders.length} recordatorios",
-                                style: const TextStyle(color: Colors.grey),
-                              ),
-                              const SizedBox(height: 8),
-                              ListView.builder(
-                                physics: const NeverScrollableScrollPhysics(),
-                                padding: EdgeInsets.zero,
-                                shrinkWrap: true,
-                                itemCount: reminders.length,
-                                itemBuilder: (context, index) {
-                                  final reminder = reminders[index];
-                                  return ReminderItem(
-                                    reminder: reminder,
-                                    isLastReminder: index < reminders.length - 1,
-                                  );
-                                },
-                              ),
-                            ],
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "${TextData.messageListSubtitle[0]}${reminders.length}${TextData.messageListSubtitle[1]}",
+                                    style: const TextStyle(color: Colors.grey),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  ListView.builder(
+                                    physics:
+                                        const NeverScrollableScrollPhysics(),
+                                    padding: EdgeInsets.zero,
+                                    shrinkWrap: true,
+                                    itemCount: reminders.length,
+                                    itemBuilder: (context, index) {
+                                      final reminder = reminders[index];
+                                      return ReminderItem(
+                                        reminder: reminder,
+                                        isLastReminder:
+                                            index < reminders.length - 1,
+                                      );
+                                    },
+                                  ),
+                                ],
+                              );
+                            },
                           );
                         },
                       ),
@@ -178,4 +180,3 @@ class _NotificationListScreenState extends State<NotificationListScreen> {
     );
   }
 }
-

@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:iwproject/domain/models/user_model.dart';
 import 'package:iwproject/firebase_options.dart';
 import 'package:iwproject/presentation/pages/notification_list_screen.dart';
+import 'package:iwproject/utils/text_data.dart';
 //import 'package:iwproject/presentation/providers/reminder_listener_provider.dart';
 import 'package:provider/provider.dart';
 import 'presentation/providers/notification_provider.dart';
@@ -80,13 +81,15 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   @override
   void initState() {
-    final users = FirebaseFirestore.instance.collection('users');
+    final users = FirebaseFirestore.instance.collection(
+      ConstantData.userCollection,
+    );
     final controller = context.read<NotificationProvider>();
 
     users.get().then((querySnapshot) {
       final users = querySnapshot.docs.map((doc) {
         final data = doc.data();
-        return UserModel.fromJson({'id': doc.id, ...data});
+        return UserModel.fromJson({ConstantData.userId: doc.id, ...data});
       }).toList();
 
       controller.setUsers(users);
@@ -96,6 +99,9 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(home: NotificationListScreen());
+    return const MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: NotificationListScreen(),
+    );
   }
 }

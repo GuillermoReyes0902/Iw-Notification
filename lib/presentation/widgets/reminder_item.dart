@@ -1,8 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:iwproject/domain/models/reminder_model.dart';
 import 'package:iwproject/presentation/providers/notification_provider.dart';
+import 'package:iwproject/utils/text_data.dart';
 import 'package:provider/provider.dart';
 
 class ReminderItem extends StatelessWidget {
@@ -21,23 +21,28 @@ class ReminderItem extends StatelessWidget {
     final other = DateTime(date.year, date.month, date.day);
     final diffDays = today.difference(other).inDays;
 
-    if (diffDays == 0) return 'Hoy';
-    if (diffDays == 1) return 'Ayer';
-    if (diffDays < 30) return 'Hace $diffDays días';
-    if (diffDays < 365) return 'Hace ${(diffDays / 30).floor()} meses';
-    return 'Hace ${(diffDays / 365).floor()} años';
+    if (diffDays == 0) return TextData.timeAgo[0];
+    if (diffDays == 1) return TextData.timeAgo[1];
+    if (diffDays < 30) {
+      return '${TextData.timeAgo[2]}$diffDays${TextData.timeAgo[3]}';
+    }
+    if (diffDays < 365) {
+      return '${TextData.timeAgo[2]}${(diffDays / 30).floor()}${TextData.timeAgo[4]}';
+    }
+    return '${TextData.timeAgo[2]}${(diffDays / 365).floor()}${TextData.timeAgo[5]}';
   }
 
   Future<void> markAsCompleted(BuildContext context) async {
     try {
       await FirebaseFirestore.instance
-          .collection('reminders')
+          .collection(ConstantData.reminderCollection)
           .doc(reminder.id)
-          .update({'completed': !reminder.completed});
+          .update({ConstantData.reminderCompleted: !reminder.completed});
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error al actualizar: $e')),
-      );
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error al actualizar: $e')));
     }
   }
 
@@ -60,19 +65,26 @@ class ReminderItem extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      const Icon(Icons.person_outline, size: 16, color: Colors.grey),
                       const SizedBox(width: 6),
                       Consumer<NotificationProvider>(
                         builder: (context, controller, _) {
-
-                          final sender = controller.users.firstWhere((user) => user.id == reminder.senderId);
-                          final receiver = controller.users.firstWhere((user) => user.id == reminder.receiverId);
-
-                          return Text(
-                            "De: ${sender.name}\nPara: ${receiver.name}",
-                            style: const TextStyle(fontWeight: FontWeight.w600, color: Colors.black87),
-
-                          );
+                          if (controller.users.isNotEmpty) {
+                            final sender = controller.users.firstWhere(
+                              (user) => user.id == reminder.senderId,
+                            );
+                            final receiver = controller.users.firstWhere(
+                              (user) => user.id == reminder.receiverId,
+                            );
+                            return Text(
+                              "${TextData.sender}${sender.name}\n${TextData.receiver}${receiver.name}",
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                                color: Colors.black87,
+                              ),
+                            );
+                          } else {
+                            return SizedBox();
+                          }
                         },
                       ),
                     ],
@@ -82,18 +94,28 @@ class ReminderItem extends StatelessWidget {
                     children: [
                       Row(
                         children: [
-                          const Icon(Icons.access_time, size: 14, color: Colors.grey),
+                          const Icon(
+                            Icons.access_time,
+                            size: 14,
+                            color: Colors.grey,
+                          ),
                           const SizedBox(width: 4),
                           Text(
                             formatDate(reminder.date),
-                            style: const TextStyle(color: Colors.grey, fontSize: 12),
+                            style: const TextStyle(
+                              color: Colors.grey,
+                              fontSize: 12,
+                            ),
                           ),
                         ],
                       ),
                       Text(
-                        "\n${DateFormat('dd/MM/yyyy\nhh:mm').format(reminder.date)}",
+                        "\n${ConstantData.dateFormat.format(reminder.date)}",
                         textAlign: TextAlign.end,
-                        style: const TextStyle(color: Colors.grey, fontSize: 12),
+                        style: const TextStyle(
+                          color: Colors.grey,
+                          fontSize: 12,
+                        ),
                       ),
                     ],
                   ),
@@ -107,7 +129,9 @@ class ReminderItem extends StatelessWidget {
                 reminder.content,
                 style: TextStyle(
                   color: reminder.completed ? Colors.grey : Colors.black87,
-                  decoration: reminder.completed ? TextDecoration.lineThrough : null,
+                  decoration: reminder.completed
+                      ? TextDecoration.lineThrough
+                      : null,
                 ),
               ),
 
@@ -117,10 +141,21 @@ class ReminderItem extends StatelessWidget {
                 alignment: Alignment.centerRight,
                 child: TextButton.icon(
                   onPressed: () => markAsCompleted(context),
-                  icon: Icon(reminder.completed ? Icons.check_circle : Icons.radio_button_unchecked, size: 18),
-                  label: Text(reminder.completed ? "Completado" : "Marcar como completado"),
+                  icon: Icon(
+                    reminder.completed
+                        ? Icons.check_circle
+                        : Icons.radio_button_unchecked,
+                    size: 18,
+                  ),
+                  label: Text(
+                    reminder.completed
+                        ? TextData.completedState[0]
+                        : TextData.completedState[1],
+                  ),
                   style: TextButton.styleFrom(
-                    foregroundColor: reminder.completed ? Colors.green : Colors.black54,
+                    foregroundColor: reminder.completed
+                        ? Colors.green
+                        : Colors.black54,
                   ),
                 ),
               ),
