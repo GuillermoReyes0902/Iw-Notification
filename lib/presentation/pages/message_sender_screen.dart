@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:iwproject/presentation/providers/notification_provider.dart';
 //import 'package:iwproject/presentation/providers/reminder_listener_provider.dart';
-import 'package:iwproject/presentation/widgets/users_list.dart';
+import 'package:iwproject/presentation/widgets/users_dropdown.dart';
+import 'package:iwproject/utils/text_data.dart';
 import 'package:provider/provider.dart';
 
 class MessageSenderScreen extends StatelessWidget {
@@ -36,7 +37,7 @@ class MessageSenderScreen extends StatelessWidget {
         leading: TextButton.icon(
           onPressed: () => goToNotificationList(context),
           icon: const Icon(Icons.arrow_back_ios, size: 18),
-          label: const Text("Ver recordatorios"),
+          label: const Text(TextData.reminderListButton),
           style: ElevatedButton.styleFrom(
             foregroundColor: Colors.black87,
             backgroundColor: Colors.white,
@@ -66,7 +67,7 @@ class MessageSenderScreen extends StatelessWidget {
                           Icon(Icons.send, size: 20),
                           SizedBox(width: 8),
                           Text(
-                            'Enviar Nuevo Recordatorio',
+                            TextData.messageSenderTitle,
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
@@ -76,7 +77,7 @@ class MessageSenderScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       const Text(
-                        'Completa los campos para enviar un recordatorio',
+                        TextData.messageSenderSubtitle,
                         style: TextStyle(color: Colors.grey),
                       ),
                       const SizedBox(height: 24),
@@ -89,29 +90,20 @@ class MessageSenderScreen extends StatelessWidget {
                               children: [
                                 // Remitente
                                 const Text(
-                                  'Seleccionar Remitente',
+                                  TextData.selectSender,
                                   style: TextStyle(fontWeight: FontWeight.w600),
                                 ),
-                                UsersList(
-                                  selectedUser: controller.selectedSender,
-                                  onChanged: controller.setSender,
-                                  hint: 'un remitente',
-                                ),
+                                UsersDropDown(origin: DropDownOrigin.sender),
                                 const SizedBox(height: 8),
                                 const Text(
-                                  'Seleccionar Destinatario',
+                                  TextData.selectReciver,
                                   style: TextStyle(fontWeight: FontWeight.w600),
                                 ),
-                                //TODO CREAR DROPDOWN DESTINATARIO
-                                UsersList(
-                                  selectedUser: controller.selectedReceiver,
-                                  onChanged: controller.setReceiver,
-                                  hint: 'un destinatario',
-                                ),
+                                UsersDropDown(origin: DropDownOrigin.receiver),
                                 const SizedBox(height: 8),
                                 // Contenido
                                 const Text(
-                                  'Contenido del recordatorio',
+                                  TextData.content,
                                   style: TextStyle(fontWeight: FontWeight.w600),
                                 ),
                                 const SizedBox(height: 8),
@@ -119,14 +111,14 @@ class MessageSenderScreen extends StatelessWidget {
                                   controller: controller.contenidoCtrl,
                                   maxLines: 6,
                                   decoration: InputDecoration(
-                                    hintText: 'Escribe el recordatorio aquí...',
+                                    hintText: TextData.contentHint,
                                     border: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(8),
                                     ),
                                   ),
                                   validator: (value) =>
                                       value == "" || value == null
-                                      ? "Contenido vacío"
+                                      ? TextData.contentValidator
                                       : null,
                                 ),
                                 const SizedBox(height: 24),
@@ -136,7 +128,9 @@ class MessageSenderScreen extends StatelessWidget {
                                   child: ElevatedButton.icon(
                                     onPressed: () => saveReminder(context),
                                     icon: const Icon(Icons.send),
-                                    label: const Text('Enviar Recordatorio'),
+                                    label: const Text(
+                                      TextData.sendReminderButton,
+                                    ),
                                   ),
                                 ),
                               ],
