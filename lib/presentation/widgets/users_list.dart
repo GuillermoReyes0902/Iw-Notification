@@ -4,36 +4,58 @@ import 'package:iwproject/presentation/providers/notification_provider.dart';
 import 'package:provider/provider.dart';
 
 class UsersList extends StatelessWidget {
-  const UsersList({super.key});
+  final UserModel? selectedUser;
+  final void Function(UserModel?) onChanged;
+  final String hint;
+  final bool showAllOption; 
+
+  const UsersList({
+    super.key,
+    required this.selectedUser,
+    required this.onChanged,
+    required this.hint,
+    this.showAllOption = false, 
+  });
 
   @override
   Widget build(BuildContext context) {
     return Selector<NotificationProvider, List<UserModel>>(
       selector: (_, controller) => controller.users,
       builder: (_, users, __) {
-        return Container(
-          padding: EdgeInsets.all(8),
-          margin: EdgeInsets.all(4),
-          color: Colors.amber,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                "Lista de usuarios temporal",
-                style: TextStyle(fontWeight: FontWeight.bold),
+        final List<DropdownMenuItem<UserModel>> items = [];
+
+        // Opción "Todos" solo si está activado
+        if (showAllOption) {
+          items.add(
+            DropdownMenuItem<UserModel>(
+              value: null,
+              child: Row(
+                children: const [
+                  Icon(Icons.group, size: 16, color: Colors.grey),
+                  SizedBox(width: 6),
+                  Text('Todos', style: TextStyle(color: Colors.grey)),
+                ],
               ),
-              SizedBox(height: 8),
-              ListView.builder(
-                physics: const NeverScrollableScrollPhysics(),
-                padding: EdgeInsets.zero,
-                shrinkWrap: true,
-                itemCount: users.length,
-                itemBuilder: (BuildContext context, int index) {
-                  return Text(users[index].name);
-                },
-              ),
-            ],
+            ),
+          );
+        }
+
+        // Lista normal de usuarios
+        items.addAll(
+          users.map(
+            (user) => DropdownMenuItem<UserModel>(
+              value: user,
+              child: Text(user.name),
+            ),
           ),
+        );
+
+        return DropdownButtonFormField<UserModel>(
+          value: selectedUser,
+          decoration: const InputDecoration(border: OutlineInputBorder()),
+          items: items,
+          onChanged: onChanged,
+          validator: (_) => null,
         );
       },
     );

@@ -92,15 +92,22 @@ class MessageSenderScreen extends StatelessWidget {
                                   'Seleccionar Remitente',
                                   style: TextStyle(fontWeight: FontWeight.w600),
                                 ),
-                                //TODO CREAR DROPDOWN REMITENTE
-                                UsersList(),
+                                UsersList(
+                                  selectedUser: controller.selectedSender,
+                                  onChanged: controller.setSender,
+                                  hint: 'un remitente',
+                                ),
                                 const SizedBox(height: 8),
                                 const Text(
                                   'Seleccionar Destinatario',
                                   style: TextStyle(fontWeight: FontWeight.w600),
                                 ),
                                 //TODO CREAR DROPDOWN DESTINATARIO
-                                UsersList(),
+                                UsersList(
+                                  selectedUser: controller.selectedReceiver,
+                                  onChanged: controller.setReceiver,
+                                  hint: 'un destinatario',
+                                ),
                                 const SizedBox(height: 8),
                                 // Contenido
                                 const Text(
