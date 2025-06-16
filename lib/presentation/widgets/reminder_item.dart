@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:iwproject/domain/models/reminder_model.dart';
 import 'package:iwproject/presentation/providers/notification_provider.dart';
+import 'package:iwproject/presentation/pages/message_sender_screen.dart';
 import 'package:iwproject/utils/text_data.dart';
 import 'package:provider/provider.dart';
 
@@ -35,7 +36,7 @@ class ReminderItem extends StatelessWidget {
   Future<void> markAsCompleted(BuildContext context) async {
     try {
       await FirebaseFirestore.instance
-          .collection(ConstantData.reminderCollection)
+          .collection(ConstantData.reminderCollectionDev)
           .doc(reminder.id)
           .update({ConstantData.reminderCompleted: !reminder.completed});
     } catch (e) {
@@ -137,27 +138,47 @@ class ReminderItem extends StatelessWidget {
 
               // BOTÓN
               const SizedBox(height: 12),
-              Align(
-                alignment: Alignment.centerRight,
-                child: TextButton.icon(
-                  onPressed: () => markAsCompleted(context),
-                  icon: Icon(
-                    reminder.completed
-                        ? Icons.check_circle
-                        : Icons.radio_button_unchecked,
-                    size: 18,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton.icon(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => MessageSenderScreen(reminder: reminder),
+                        ),
+                      );
+                    },
+                    icon: const Icon(
+                      Icons.edit,
+                      size: 18,
+                    ),
+                    label: const Text("Editar"),
+                    style: TextButton.styleFrom(
+                      foregroundColor: Colors.black54,
+                    ),
                   ),
-                  label: Text(
-                    reminder.completed
-                        ? TextData.completedState[0]
-                        : TextData.completedState[1],
+                  const SizedBox(width: 8),
+                  TextButton.icon(
+                    onPressed: () => markAsCompleted(context),
+                    icon: Icon(
+                      reminder.completed
+                          ? Icons.check_circle
+                          : Icons.radio_button_unchecked,
+                      size: 18,
+                    ),
+                    label: Text(
+                      reminder.completed
+                          ? TextData.completedState[0]
+                          : TextData.completedState[1],
+                    ),
+                    style: TextButton.styleFrom(
+                      foregroundColor:
+                          reminder.completed ? Colors.green : Colors.black54,
+                    ),
                   ),
-                  style: TextButton.styleFrom(
-                    foregroundColor: reminder.completed
-                        ? Colors.green
-                        : Colors.black54,
-                  ),
-                ),
+                ],
               ),
             ],
           ),

@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:iwproject/presentation/providers/notification_provider.dart';
 //import 'package:iwproject/presentation/providers/reminder_listener_provider.dart';
+import 'package:iwproject/domain/models/reminder_model.dart';
 import 'package:iwproject/presentation/widgets/users_dropdown.dart';
 import 'package:iwproject/utils/text_data.dart';
 import 'package:provider/provider.dart';
 
 class MessageSenderScreen extends StatelessWidget {
-  const MessageSenderScreen({super.key});
+  final ReminderModel? reminder;
+  const MessageSenderScreen({super.key, this.reminder});
 
   void goToNotificationList(BuildContext context) async {
     Navigator.pop(context);
@@ -25,6 +27,14 @@ class MessageSenderScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final controller = context.read<NotificationProvider>();
+    
+    if (reminder != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        controller.setReminderDataForEditing(reminder!);
+      });
+    }
+    
     // final listener = context.read<ReminderListenerProvider>();
     // listener.setCurrentScreen('MessageSender');
     // listener.startListening(context);

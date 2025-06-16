@@ -91,12 +91,12 @@ class NotificationListScreen extends StatelessWidget {
                             stream: selectedReceiverMainList == null
                                 ? FirebaseFirestore.instance
                                       .collection(
-                                        ConstantData.reminderCollection,
+                                        ConstantData.reminderCollectionDev,
                                       )
                                       .snapshots()
                                 : FirebaseFirestore.instance
                                       .collection(
-                                        ConstantData.reminderCollection,
+                                        ConstantData.reminderCollectionDev,
                                       )
                                       .where(
                                         ConstantData.reminderReceiverId,
