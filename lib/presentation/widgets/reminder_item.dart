@@ -141,23 +141,27 @@ class ReminderItem extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  TextButton.icon(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => MessageSenderScreen(reminder: reminder),
+                  Consumer<NotificationProvider>(
+                    builder: (context, controller, _) {
+                      final isOwner = controller.currentUser?.id == reminder.senderId;
+                      if (!isOwner) return const SizedBox();
+
+                      return TextButton.icon(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => MessageSenderScreen(reminder: reminder),
+                            ),
+                          );
+                        },
+                        icon: const Icon(Icons.edit, size: 18),
+                        label: const Text("Editar"),
+                        style: TextButton.styleFrom(
+                          foregroundColor: Colors.black54,
                         ),
                       );
                     },
-                    icon: const Icon(
-                      Icons.edit,
-                      size: 18,
-                    ),
-                    label: const Text("Editar"),
-                    style: TextButton.styleFrom(
-                      foregroundColor: Colors.black54,
-                    ),
                   ),
                   const SizedBox(width: 8),
                   TextButton.icon(

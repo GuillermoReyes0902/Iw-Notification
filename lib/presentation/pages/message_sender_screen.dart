@@ -1,41 +1,39 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:iwproject/domain/models/reminder_model.dart';
 import 'package:iwproject/presentation/providers/notification_provider.dart';
 import 'package:iwproject/presentation/providers/reminder_listener_provider.dart';
-//import 'package:iwproject/presentation/providers/reminder_listener_provider.dart';
-import 'package:iwproject/domain/models/reminder_model.dart';
 import 'package:iwproject/presentation/widgets/users_dropdown.dart';
 import 'package:iwproject/utils/text_data.dart';
-import 'package:provider/provider.dart';
 
 class MessageSenderScreen extends StatelessWidget {
   final ReminderModel? reminder;
   const MessageSenderScreen({super.key, this.reminder});
 
-  void goToNotificationList(BuildContext context) async {
+  void goToNotificationList(BuildContext context) {
     Navigator.pop(context);
   }
 
   Future<void> saveReminder(BuildContext context) async {
     FocusScope.of(context).unfocus();
     final controller = context.read<NotificationProvider>();
-    await controller.saveReminder().then((value) {
-      if (value == true) {
-        if (!context.mounted) return;
-        goToNotificationList(context);
-      }
-    });
+    final success = await controller.saveReminder();
+    if (success && context.mounted) {
+      goToNotificationList(context);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final controller = context.read<NotificationProvider>();
-    
+
+    // Si viene recordatorio, carga datos en el formulario
     if (reminder != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         controller.setReminderDataForEditing(reminder!);
       });
     }
-    
+
     final listener = context.read<ReminderListenerProvider>();
     listener.startListening(context);
 
@@ -43,8 +41,7 @@ class MessageSenderScreen extends StatelessWidget {
       canPop: true,
       onPopInvokedWithResult: (didPop, _) {
         if (didPop) {
-          final controller = context.read<NotificationProvider>();
-          controller.clearForm(); 
+          context.read<NotificationProvider>().clearForm();
         }
       },
       child: Scaffold(
@@ -55,8 +52,7 @@ class MessageSenderScreen extends StatelessWidget {
           automaticallyImplyLeading: false,
           leading: TextButton.icon(
             onPressed: () {
-              final controller = context.read<NotificationProvider>();
-              controller.clearForm(); 
+              context.read<NotificationProvider>().clearForm();
               goToNotificationList(context);
             },
             icon: const Icon(Icons.arrow_back_ios, size: 18),
@@ -103,7 +99,7 @@ class MessageSenderScreen extends StatelessWidget {
                           TextData.messageSenderSubtitle,
                           style: TextStyle(color: Colors.grey),
                         ),
-                        const SizedBox(height: 24),
+                        const SizedBox(height: 14),
                         Consumer<NotificationProvider>(
                           builder: (context, controller, _) {
                             return Form(
@@ -112,16 +108,11 @@ class MessageSenderScreen extends StatelessWidget {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   const Text(
-                                    TextData.selectSender,
+                                    TextData.receiver,
                                     style: TextStyle(fontWeight: FontWeight.w600),
                                   ),
-                                  UsersDropDown(origin: DropDownOrigin.sender),
                                   const SizedBox(height: 8),
-                                  const Text(
-                                    TextData.selectReciver,
-                                    style: TextStyle(fontWeight: FontWeight.w600),
-                                  ),
-                                  UsersDropDown(origin: DropDownOrigin.receiver),
+                                  const UsersDropDown(origin: DropDownOrigin.receiver),
                                   const SizedBox(height: 8),
                                   const Text(
                                     TextData.content,
@@ -138,7 +129,7 @@ class MessageSenderScreen extends StatelessWidget {
                                       ),
                                     ),
                                     validator: (value) =>
-                                        value == "" || value == null
+                                        value == null || value.isEmpty
                                             ? TextData.contentValidator
                                             : null,
                                   ),
@@ -148,9 +139,7 @@ class MessageSenderScreen extends StatelessWidget {
                                     child: ElevatedButton.icon(
                                       onPressed: () => saveReminder(context),
                                       icon: const Icon(Icons.send),
-                                      label: const Text(
-                                        TextData.sendReminderButton,
-                                      ),
+                                      label: const Text(TextData.sendReminderButton),
                                     ),
                                   ),
                                 ],

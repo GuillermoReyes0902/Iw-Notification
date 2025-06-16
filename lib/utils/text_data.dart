@@ -18,6 +18,7 @@ class TextData {
   ];
   static const List<String> completedState = ["Completado", "Pendiente"];
   static const String newReminderButton = "Nuevo Recordatorio";
+  static const String logOutButton = "Cerrar sesión";
   //
   static const String messageSenderTitle = "Enviar nuevo recordatorio";
   static const String messageSenderSubtitle =
@@ -31,6 +32,8 @@ class TextData {
   static const String contentValidator = "Contenido vacío";
   static const String sendReminderButton = "Enviar Recordatorio";
   static const String reminderListButton = "Ver recordatorios";
+
+  static String loginTitle = "¿Quién está usando IW Reminder?";
 }
 
 class ConstantData {
@@ -48,4 +51,7 @@ class ConstantData {
   static const String userCollection = "users";
   static const String userId = "id";
   static const String userName = "name";
+  static const String userPhoto = "photo";
+  static const String defaultUserImage =
+      'https://www.shutterstock.com/image-vector/blank-avatar-photo-place-holder-600nw-1095249842.jpg';
 }

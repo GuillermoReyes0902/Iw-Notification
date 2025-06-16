@@ -2,22 +2,65 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:iwproject/domain/models/reminder_model.dart';
 import 'package:iwproject/domain/models/user_model.dart';
+import 'package:iwproject/utils/shared_preferences_handler.dart';
 import 'package:iwproject/utils/text_data.dart';
 
 class NotificationProvider with ChangeNotifier {
   final formKey = GlobalKey<FormState>();
-  TextEditingController contenidoCtrl = TextEditingController();
-  
+  final TextEditingController contenidoCtrl = TextEditingController();
+
+  UserModel? currentUser;
+
   List<UserModel> users = [];
-  String? editingReminderId; 
-  bool isLoading = false; 
+  String? editingReminderId;
+  bool isLoading = false;
 
   UserModel? selectedSender;
   UserModel? selectedReceiver;
   UserModel? selectedReceiverMainList;
 
+  Future<void> logIn(UserModel selectedUser) async {
+    await SharedPreferencesHandler.setUser(selectedUser);
+    currentUser = selectedUser;
+    selectedSender = selectedUser;
+    notifyListeners();
+  }
+
+  Future<void> logOut() async {
+    await SharedPreferencesHandler.deleteUser();
+    currentUser = null;
+    selectedSender = null;
+    notifyListeners();
+  }
+
+  Future<bool> getUser() async {
+    final user = await SharedPreferencesHandler.getUser();
+    if (user != null) {
+      currentUser = user;
+      selectedSender = user;
+      notifyListeners();
+      return true;
+    }
+    return false;
+  }
+
   void setUsers(List<UserModel> newUsers) {
     users = newUsers;
+    notifyListeners();
+  }
+
+  void setSender(UserModel? user) {
+    selectedSender = user;
+    notifyListeners();
+  }
+
+  void setReceiver(UserModel? user) {
+    selectedReceiver = user;
+    notifyListeners();
+  }
+
+  void setMainListReceiver(UserModel? user) {
+    selectedReceiverMainList = user;
     notifyListeners();
   }
 
@@ -58,38 +101,23 @@ class NotificationProvider with ChangeNotifier {
     }
   }
 
-  void setSender(UserModel? user) {
-    selectedSender = user;
-    notifyListeners();
-  }
-
-  void setMainListReceiver(UserModel? user) {
-    selectedReceiverMainList = user;
-    notifyListeners();
-  }
-
-  void setReceiver(UserModel? user) {
-    selectedReceiver = user;
-    notifyListeners();
-  }
-
   void setReminderDataForEditing(ReminderModel reminder) {
     editingReminderId = reminder.id;
     contenidoCtrl.text = reminder.content;
-    
+
     try {
-      selectedSender = users.firstWhere((user) => user.id == reminder.senderId);
-      selectedReceiver = users.firstWhere((user) => user.id == reminder.receiverId);
+      selectedSender = users.firstWhere((u) => u.id == reminder.senderId);
+      selectedReceiver = users.firstWhere((u) => u.id == reminder.receiverId);
     } catch (e) {
-      debugPrint("Error al encontrar usuarios: $e");
+      debugPrint("Error al encontrar usuarios para edición: $e");
     }
-    
+
     notifyListeners();
   }
 
   void clearForm() {
     contenidoCtrl.clear();
-    selectedSender = null;
+    selectedSender = currentUser; 
     selectedReceiver = null;
     editingReminderId = null;
     notifyListeners();
