@@ -34,7 +34,8 @@ class NotificationListScreen extends StatelessWidget {
     }
 
     final listener = context.read<ReminderListenerProvider>();
-    listener.startListening(context);
+    final controllerNotification = context.read<NotificationProvider>();
+    listener.startListening(context, controllerNotification.currentUser!.id);
 
     return Scaffold(
       backgroundColor: const Color(0xFFF9FAFB),

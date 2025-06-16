@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:iwproject/domain/models/reminder_model.dart';
+import 'package:iwproject/domain/models/user_model.dart';
 import 'package:iwproject/presentation/providers/notification_provider.dart';
 import 'package:iwproject/presentation/pages/message_sender_screen.dart';
 import 'package:iwproject/utils/text_data.dart';
@@ -141,9 +142,10 @@ class ReminderItem extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  Consumer<NotificationProvider>(
-                    builder: (context, controller, _) {
-                      final isOwner = controller.currentUser?.id == reminder.senderId;
+                  Selector<NotificationProvider, UserModel?>(
+                    selector: (_, controller) => controller.currentUser,
+                    builder: (_, currentUser, _) {
+                      final isOwner = currentUser?.id == reminder.senderId;
                       if (!isOwner) return const SizedBox();
 
                       return TextButton.icon(
@@ -151,7 +153,8 @@ class ReminderItem extends StatelessWidget {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => MessageSenderScreen(reminder: reminder),
+                              builder: (context) =>
+                                  MessageSenderScreen(reminder: reminder),
                             ),
                           );
                         },
@@ -164,23 +167,31 @@ class ReminderItem extends StatelessWidget {
                     },
                   ),
                   const SizedBox(width: 8),
-                  TextButton.icon(
-                    onPressed: () => markAsCompleted(context),
-                    icon: Icon(
-                      reminder.completed
-                          ? Icons.check_circle
-                          : Icons.radio_button_unchecked,
-                      size: 18,
-                    ),
-                    label: Text(
-                      reminder.completed
-                          ? TextData.completedState[0]
-                          : TextData.completedState[1],
-                    ),
-                    style: TextButton.styleFrom(
-                      foregroundColor:
-                          reminder.completed ? Colors.green : Colors.black54,
-                    ),
+                  Selector<NotificationProvider, UserModel?>(
+                    selector: (_, controller) => controller.currentUser,
+                    builder: (_, currentUser, _) {
+                      final isReceiver = currentUser?.id == reminder.receiverId;
+                      if (!isReceiver) return const SizedBox();
+                      return TextButton.icon(
+                        onPressed: () => markAsCompleted(context),
+                        icon: Icon(
+                          reminder.completed
+                              ? Icons.check_circle
+                              : Icons.radio_button_unchecked,
+                          size: 18,
+                        ),
+                        label: Text(
+                          reminder.completed
+                              ? TextData.completedState[0]
+                              : TextData.completedState[1],
+                        ),
+                        style: TextButton.styleFrom(
+                          foregroundColor: reminder.completed
+                              ? Colors.green
+                              : Colors.black54,
+                        ),
+                      );
+                    },
                   ),
                 ],
               ),
