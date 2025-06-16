@@ -4,21 +4,25 @@ import 'package:iwproject/domain/models/reminder_model.dart';
 import 'package:iwproject/domain/models/user_model.dart';
 import 'package:iwproject/presentation/pages/message_sender_screen.dart';
 import 'package:iwproject/presentation/providers/notification_provider.dart';
-//import 'package:iwproject/presentation/providers/reminder_listener_provider.dart';
+import 'package:iwproject/presentation/providers/reminder_listener_provider.dart';
 import 'package:iwproject/presentation/widgets/reminder_item.dart';
 import 'package:iwproject/presentation/widgets/users_dropdown.dart';
-//import 'package:provider/provider.dart';
-import 'package:iwproject/utils/text_data.dart';
 import 'package:provider/provider.dart';
+import 'package:iwproject/utils/text_data.dart';
 
 class NotificationListScreen extends StatelessWidget {
   const NotificationListScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // final listener = context.read<ReminderListenerProvider>();
-    // listener.setCurrentScreen('NotificationList');
-    // listener.startListening(context);
+    //
+    setInitialReminders(List<ReminderModel> reminders) {
+      final controllerReminders = context.read<ReminderListenerProvider>();
+      controllerReminders.setInitialReminders(reminders);
+    }
+
+    final listener = context.read<ReminderListenerProvider>();
+    listener.startListening(context);
 
     return Scaffold(
       backgroundColor: const Color(0xFFF9FAFB),
@@ -91,12 +95,12 @@ class NotificationListScreen extends StatelessWidget {
                             stream: selectedReceiverMainList == null
                                 ? FirebaseFirestore.instance
                                       .collection(
-                                        ConstantData.reminderCollection,
+                                        ConstantData.reminderCollectionDev,
                                       )
                                       .snapshots()
                                 : FirebaseFirestore.instance
                                       .collection(
-                                        ConstantData.reminderCollection,
+                                        ConstantData.reminderCollectionDev,
                                       )
                                       .where(
                                         ConstantData.reminderReceiverId,
@@ -135,10 +139,11 @@ class NotificationListScreen extends StatelessWidget {
                                   ...data,
                                 });
                               }).toList();
-
                               reminders.sort(
                                 (a, b) => b.date.compareTo(a.date),
                               );
+
+                              setInitialReminders(reminders);
 
                               return Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,

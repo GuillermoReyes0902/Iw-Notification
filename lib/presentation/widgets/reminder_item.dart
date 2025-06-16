@@ -35,7 +35,7 @@ class ReminderItem extends StatelessWidget {
   Future<void> markAsCompleted(BuildContext context) async {
     try {
       await FirebaseFirestore.instance
-          .collection(ConstantData.reminderCollection)
+          .collection(ConstantData.reminderCollectionDev)
           .doc(reminder.id)
           .update({ConstantData.reminderCompleted: !reminder.completed});
     } catch (e) {
