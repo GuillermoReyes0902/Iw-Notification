@@ -10,7 +10,6 @@ import 'package:iwproject/firebase_options.dart';
 import 'package:iwproject/presentation/pages/notification_list_screen.dart';
 import 'package:iwproject/presentation/providers/reminder_listener_provider.dart';
 import 'package:iwproject/utils/text_data.dart';
-//import 'package:iwproject/presentation/providers/reminder_listener_provider.dart';
 import 'package:provider/provider.dart';
 import 'presentation/providers/notification_provider.dart';
 import 'package:launch_at_startup/launch_at_startup.dart';

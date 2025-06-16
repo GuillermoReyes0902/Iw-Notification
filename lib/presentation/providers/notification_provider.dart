@@ -9,10 +9,9 @@ class NotificationProvider with ChangeNotifier {
   TextEditingController contenidoCtrl = TextEditingController();
   
   List<UserModel> users = [];
-  String? editingReminderId; // Para trackear si estamos editando
-  bool isLoading = false; // Para manejar estados de carga
+  String? editingReminderId; 
+  bool isLoading = false; 
 
-  // Usuarios seleccionados
   UserModel? selectedSender;
   UserModel? selectedReceiver;
   UserModel? selectedReceiverMainList;
@@ -23,31 +22,39 @@ class NotificationProvider with ChangeNotifier {
   }
 
   Future<bool> saveReminder() async {
-    if (formKey.currentState!.validate()) {
-      try {
-        // Cloud Firestore
-        final remindersRef = FirebaseFirestore.instance.collection(
-          ConstantData.reminderCollection,
-        );
-        await remindersRef.add(
-          ReminderModel(
-            date: DateTime.now(),
-            content: contenidoCtrl.text.trim(),
-            senderId: selectedSender?.id ?? '',
-            receiverId: selectedReceiver?.id ?? '',
-            completed: false,
-          ).toJson(),
-        );
-        formKey.currentState!.reset();
-        contenidoCtrl.clear();
-        selectedSender = null;
-        selectedReceiver = null;
-        notifyListeners();
-        return true;
-      } catch (e) {
-        debugPrint("Error al guardar recordatorio: $e");
-        return false;
+    if (!formKey.currentState!.validate()) return false;
+    if (selectedSender == null || selectedReceiver == null) return false;
+
+    isLoading = true;
+    notifyListeners();
+
+    try {
+      final remindersRef = FirebaseFirestore.instance
+          .collection(ConstantData.reminderCollectionDev);
+
+      final reminderData = ReminderModel(
+        date: DateTime.now(),
+        content: contenidoCtrl.text.trim(),
+        senderId: selectedSender!.id,
+        receiverId: selectedReceiver!.id,
+        completed: false,
+      ).toJson();
+
+      if (editingReminderId != null) {
+        await remindersRef.doc(editingReminderId).update(reminderData);
+      } else {
+        await remindersRef.add(reminderData);
       }
+
+      clearForm();
+      isLoading = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      debugPrint("Error al guardar recordatorio: $e");
+      isLoading = false;
+      notifyListeners();
+      return false;
     }
   }
 
@@ -70,7 +77,6 @@ class NotificationProvider with ChangeNotifier {
     editingReminderId = reminder.id;
     contenidoCtrl.text = reminder.content;
     
-    // Buscar y establecer los usuarios correspondientes
     try {
       selectedSender = users.firstWhere((user) => user.id == reminder.senderId);
       selectedReceiver = users.firstWhere((user) => user.id == reminder.receiverId);
@@ -89,7 +95,6 @@ class NotificationProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  // Método para actualizar el estado completado
   Future<void> toggleReminderCompletion(String reminderId, bool currentStatus) async {
     try {
       await FirebaseFirestore.instance
