@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:iwproject/presentation/providers/notification_provider.dart';
+import 'package:iwproject/presentation/providers/reminder_listener_provider.dart';
 //import 'package:iwproject/presentation/providers/reminder_listener_provider.dart';
 import 'package:iwproject/domain/models/reminder_model.dart';
 import 'package:iwproject/presentation/widgets/users_dropdown.dart';
@@ -38,6 +39,8 @@ class MessageSenderScreen extends StatelessWidget {
     // final listener = context.read<ReminderListenerProvider>();
     // listener.setCurrentScreen('MessageSender');
     // listener.startListening(context);
+    final listener = context.read<ReminderListenerProvider>();
+    listener.startListening(context);
     return Scaffold(
       backgroundColor: const Color(0xFFF9FAFB),
       appBar: AppBar(

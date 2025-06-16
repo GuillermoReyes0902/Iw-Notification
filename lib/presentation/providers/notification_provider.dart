@@ -23,41 +23,31 @@ class NotificationProvider with ChangeNotifier {
   }
 
   Future<bool> saveReminder() async {
-    if (!formKey.currentState!.validate()) return false;
-    if (selectedSender == null || selectedReceiver == null) return false;
-
-    isLoading = true;
-    notifyListeners();
-
-    try {
-      final remindersRef = FirebaseFirestore.instance
-          .collection(ConstantData.reminderCollectionDev);
-
-      final reminderData = ReminderModel(
-        date: DateTime.now(),
-        content: contenidoCtrl.text.trim(),
-        senderId: selectedSender!.id,
-        receiverId: selectedReceiver!.id,
-        completed: false,
-      ).toJson();
-
-      if (editingReminderId != null) {
-        // Modo edición - actualizar existente
-        await remindersRef.doc(editingReminderId).update(reminderData);
-      } else {
-        // Modo creación - agregar nuevo
-        await remindersRef.add(reminderData);
+    if (formKey.currentState!.validate()) {
+      try {
+        // Cloud Firestore
+        final remindersRef = FirebaseFirestore.instance.collection(
+          ConstantData.reminderCollection,
+        );
+        await remindersRef.add(
+          ReminderModel(
+            date: DateTime.now(),
+            content: contenidoCtrl.text.trim(),
+            senderId: selectedSender?.id ?? '',
+            receiverId: selectedReceiver?.id ?? '',
+            completed: false,
+          ).toJson(),
+        );
+        formKey.currentState!.reset();
+        contenidoCtrl.clear();
+        selectedSender = null;
+        selectedReceiver = null;
+        notifyListeners();
+        return true;
+      } catch (e) {
+        debugPrint("Error al guardar recordatorio: $e");
+        return false;
       }
-
-      clearForm();
-      isLoading = false;
-      notifyListeners();
-      return true;
-    } catch (e) {
-      debugPrint("Error al guardar recordatorio: $e");
-      isLoading = false;
-      notifyListeners();
-      return false;
     }
   }
 
