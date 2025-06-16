@@ -4,7 +4,7 @@ import 'package:iwproject/presentation/providers/notification_provider.dart';
 import 'package:iwproject/utils/text_data.dart';
 import 'package:provider/provider.dart';
 
-enum DropDownOrigin { mainlist, sender, receiver }
+enum DropDownOrigin { mainlist, receiver }
 
 class UsersDropDown extends StatelessWidget {
   final DropDownOrigin origin;
@@ -43,23 +43,17 @@ class UsersDropDown extends StatelessWidget {
         );
 
         return DropdownButtonFormField<UserModel>(
-          value: origin == DropDownOrigin.sender
-              ? controller.selectedSender
-              : origin == DropDownOrigin.receiver
+          value: origin == DropDownOrigin.receiver
               ? controller.selectedReceiver
               : controller.selectedReceiverMainList,
           decoration: const InputDecoration(border: OutlineInputBorder()),
           items: items,
-          onChanged: (value) => origin == DropDownOrigin.sender
-              ? controller.setSender(value)
-              : origin == DropDownOrigin.receiver
+          onChanged: (value) => origin == DropDownOrigin.receiver
               ? controller.setReceiver(value)
               : controller.setMainListReceiver(value),
           validator: (value) =>
-              (value == null && origin != DropDownOrigin.mainlist)
-              ? origin == DropDownOrigin.sender
-                    ? TextData.senderValidator
-                    : TextData.receiverValidator
+              (value == null && origin == DropDownOrigin.receiver)
+              ? TextData.receiverValidator
               : null,
         );
       },

@@ -2,11 +2,36 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:iwproject/domain/models/reminder_model.dart';
 import 'package:iwproject/domain/models/user_model.dart';
+import 'package:iwproject/utils/shared_preferences_handler.dart';
 import 'package:iwproject/utils/text_data.dart';
 
 class NotificationProvider with ChangeNotifier {
   final formKey = GlobalKey<FormState>();
   TextEditingController contenidoCtrl = TextEditingController();
+
+  UserModel? currentUser;
+
+  void logIn(UserModel selectedUser) async {
+    await SharedPreferencesHandler.setUser(selectedUser);
+    currentUser = selectedUser;
+    notifyListeners();
+  }
+
+  void logOut() async {
+    await SharedPreferencesHandler.deleteUser();
+    currentUser = null;
+    notifyListeners();
+  }
+
+  Future<bool> getUser() async {
+    var user = await SharedPreferencesHandler.getUser();
+    if (user != null) {
+      currentUser = user;
+      notifyListeners();
+      return true;
+    }
+    return false;
+  }
 
   List<UserModel> users = [];
 
@@ -26,14 +51,13 @@ class NotificationProvider with ChangeNotifier {
           ReminderModel(
             date: DateTime.now(),
             content: contenidoCtrl.text.trim(),
-            senderId: selectedSender?.id ?? '',
+            senderId: currentUser!.id,
             receiverId: selectedReceiver?.id ?? '',
             completed: false,
           ).toJson(),
         );
         formKey.currentState!.reset();
         contenidoCtrl.clear();
-        selectedSender = null;
         selectedReceiver = null;
         notifyListeners();
         return true;
@@ -44,14 +68,8 @@ class NotificationProvider with ChangeNotifier {
     return false;
   }
 
-  UserModel? selectedSender;
   UserModel? selectedReceiver;
   UserModel? selectedReceiverMainList;
-
-  void setSender(UserModel? user) {
-    selectedSender = user;
-    notifyListeners();
-  }
 
   void setMainListReceiver(UserModel? user) {
     selectedReceiverMainList = user;

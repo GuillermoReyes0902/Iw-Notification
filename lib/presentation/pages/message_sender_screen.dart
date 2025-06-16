@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:iwproject/presentation/providers/notification_provider.dart';
 import 'package:iwproject/presentation/providers/reminder_listener_provider.dart';
-//import 'package:iwproject/presentation/providers/reminder_listener_provider.dart';
 import 'package:iwproject/presentation/widgets/users_dropdown.dart';
 import 'package:iwproject/utils/text_data.dart';
 import 'package:provider/provider.dart';
@@ -88,13 +87,6 @@ class MessageSenderScreen extends StatelessWidget {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                // Remitente
-                                const Text(
-                                  TextData.selectSender,
-                                  style: TextStyle(fontWeight: FontWeight.w600),
-                                ),
-                                UsersDropDown(origin: DropDownOrigin.sender),
-                                const SizedBox(height: 8),
                                 const Text(
                                   TextData.selectReciver,
                                   style: TextStyle(fontWeight: FontWeight.w600),
