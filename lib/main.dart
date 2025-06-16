@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:iwproject/domain/models/user_model.dart';
 import 'package:iwproject/firebase_options.dart';
 import 'package:iwproject/presentation/pages/notification_list_screen.dart';
+import 'package:iwproject/presentation/pages/user_login_screen.dart';
 import 'package:iwproject/presentation/providers/reminder_listener_provider.dart';
 import 'package:iwproject/utils/text_data.dart';
 //import 'package:iwproject/presentation/providers/reminder_listener_provider.dart';
@@ -92,17 +93,24 @@ class _MyAppState extends State<MyApp> {
         final data = doc.data();
         return UserModel.fromJson({ConstantData.userId: doc.id, ...data});
       }).toList();
-
       controller.setUsers(users);
+      controller.getUser();
     });
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: NotificationListScreen(),
+      home: Selector<NotificationProvider, UserModel?>(
+        selector: (_, controller) => controller.currentUser,
+        builder: (_, currentUser, _) {
+          return currentUser != null
+              ? NotificationListScreen()
+              : UserLoginScreen();
+        },
+      ),
     );
   }
 }

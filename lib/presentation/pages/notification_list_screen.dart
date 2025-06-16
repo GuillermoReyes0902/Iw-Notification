@@ -21,33 +21,67 @@ class NotificationListScreen extends StatelessWidget {
       controllerReminders.setInitialReminders(reminders);
     }
 
+    newReminderButton() {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const MessageSenderScreen()),
+      );
+    }
+
+    exitButton() {
+      final controller = context.read<NotificationProvider>();
+      controller.logOut();
+    }
+
     final listener = context.read<ReminderListenerProvider>();
     listener.startListening(context);
 
     return Scaffold(
       backgroundColor: const Color(0xFFF9FAFB),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: newReminderButton,
+        label: Text(TextData.newReminderButton),
+      ),
       appBar: AppBar(
+        title: Selector<NotificationProvider, UserModel?>(
+          selector: (_, controller) => controller.currentUser,
+          builder: (_, currentUser, _) {
+            return Row(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.all(Radius.circular(35)),
+                  child: Image.network(
+                    currentUser!.photo,
+                    height: 35,
+                    width: 35,
+                  ),
+                ),
+                SizedBox(width: 12),
+                Text(
+                  "Bienvenido/a ${currentUser.name}",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+              ],
+            );
+          },
+        ),
+
+        centerTitle: false,
         backgroundColor: Colors.transparent,
         elevation: 0,
         automaticallyImplyLeading: false,
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 16, top: 8),
-            child: ElevatedButton.icon(
-              onPressed: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const MessageSenderScreen(),
-                ),
-              ),
-              icon: const Icon(Icons.send, size: 18),
-              label: const Text(TextData.newReminderButton),
+            child: TextButton(
+              onPressed: () => exitButton(),
               style: ElevatedButton.styleFrom(
                 foregroundColor: Colors.black87,
                 backgroundColor: Colors.white,
                 side: const BorderSide(color: Colors.grey),
                 elevation: 0,
               ),
+              child: const Text(TextData.logOutButton),
             ),
           ),
         ],
