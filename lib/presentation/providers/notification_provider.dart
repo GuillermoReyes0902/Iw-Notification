@@ -20,7 +20,7 @@ class NotificationProvider with ChangeNotifier {
       try {
         // Cloud Firestore
         final remindersRef = FirebaseFirestore.instance.collection(
-          ConstantData.reminderCollection,
+          ConstantData.reminderCollectionDev,
         );
         await remindersRef.add(
           ReminderModel(
@@ -39,7 +39,6 @@ class NotificationProvider with ChangeNotifier {
         return true;
       } catch (e) {
         debugPrint("Error al guardar recordatorio: $e");
-        return false;
       }
     }
     return false;
