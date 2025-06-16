@@ -28,7 +28,7 @@ class ReminderListenerProvider with ChangeNotifier {
     }
   }
 
-  void startListening(BuildContext context) async {
+  void startListening(BuildContext context, String currentUserId) async {
     _subscription?.cancel(); // detener si ya está escuchando
     _subscription = _db
         .collection(ConstantData.reminderCollectionDev)
@@ -55,11 +55,13 @@ class ReminderListenerProvider with ChangeNotifier {
                   (user) =>
                       user.id == doc.data()[ConstantData.reminderReceiverId],
                 );
-                //enviar notificación
-                await LocalNotificationHandler.showNotification(
-                  "Nuevo recordatorio de ${sender.name} para ${receiver.name}",
-                  "",
-                );
+                if (sender.id != currentUserId) {
+                  //enviar notificación
+                  await LocalNotificationHandler.showNotification(
+                    "Nuevo recordatorio de ${sender.name} para ${receiver.name}",
+                    "",
+                  );
+                }
                 //agregarlo a reminders iniciales
                 addReminderToInitialList(doc.id);
               }

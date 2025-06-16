@@ -35,7 +35,8 @@ class MessageSenderScreen extends StatelessWidget {
     }
 
     final listener = context.read<ReminderListenerProvider>();
-    listener.startListening(context);
+    final controllerNotification = context.read<NotificationProvider>();
+    listener.startListening(context, controllerNotification.currentUser!.id);
 
     return PopScope(
       canPop: true,
@@ -109,14 +110,20 @@ class MessageSenderScreen extends StatelessWidget {
                                 children: [
                                   const Text(
                                     TextData.receiver,
-                                    style: TextStyle(fontWeight: FontWeight.w600),
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                    ),
                                   ),
                                   const SizedBox(height: 8),
-                                  const UsersDropDown(origin: DropDownOrigin.receiver),
+                                  const UsersDropDown(
+                                    origin: DropDownOrigin.receiver,
+                                  ),
                                   const SizedBox(height: 8),
                                   const Text(
                                     TextData.content,
-                                    style: TextStyle(fontWeight: FontWeight.w600),
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                    ),
                                   ),
                                   const SizedBox(height: 8),
                                   TextFormField(
@@ -130,8 +137,8 @@ class MessageSenderScreen extends StatelessWidget {
                                     ),
                                     validator: (value) =>
                                         value == null || value.isEmpty
-                                            ? TextData.contentValidator
-                                            : null,
+                                        ? TextData.contentValidator
+                                        : null,
                                   ),
                                   const SizedBox(height: 24),
                                   SizedBox(
@@ -139,7 +146,9 @@ class MessageSenderScreen extends StatelessWidget {
                                     child: ElevatedButton.icon(
                                       onPressed: () => saveReminder(context),
                                       icon: const Icon(Icons.send),
-                                      label: const Text(TextData.sendReminderButton),
+                                      label: const Text(
+                                        TextData.sendReminderButton,
+                                      ),
                                     ),
                                   ),
                                 ],
