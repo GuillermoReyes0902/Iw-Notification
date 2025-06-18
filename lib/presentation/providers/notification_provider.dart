@@ -72,8 +72,9 @@ class NotificationProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      final remindersRef = FirebaseFirestore.instance
-          .collection(ConstantData.reminderCollectionDev);
+      final remindersRef = FirebaseFirestore.instance.collection(
+        ConstantData.reminderCollection,
+      );
 
       final reminderData = ReminderModel(
         date: DateTime.now(),
@@ -117,16 +118,19 @@ class NotificationProvider with ChangeNotifier {
 
   void clearForm() {
     contenidoCtrl.clear();
-    selectedSender = currentUser; 
+    selectedSender = currentUser;
     selectedReceiver = null;
     editingReminderId = null;
     notifyListeners();
   }
 
-  Future<void> toggleReminderCompletion(String reminderId, bool currentStatus) async {
+  Future<void> toggleReminderCompletion(
+    String reminderId,
+    bool currentStatus,
+  ) async {
     try {
       await FirebaseFirestore.instance
-          .collection(ConstantData.reminderCollectionDev)
+          .collection(ConstantData.reminderCollection)
           .doc(reminderId)
           .update({'completed': !currentStatus});
     } catch (e) {

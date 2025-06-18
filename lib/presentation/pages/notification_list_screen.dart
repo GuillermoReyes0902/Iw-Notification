@@ -4,11 +4,11 @@ import 'package:iwproject/domain/models/reminder_model.dart';
 import 'package:iwproject/domain/models/user_model.dart';
 import 'package:iwproject/presentation/pages/message_sender_screen.dart';
 import 'package:iwproject/presentation/providers/notification_provider.dart';
-import 'package:iwproject/presentation/providers/reminder_listener_provider.dart';
 import 'package:iwproject/presentation/widgets/reminder_item.dart';
 import 'package:iwproject/presentation/widgets/users_dropdown.dart';
 import 'package:provider/provider.dart';
 import 'package:iwproject/utils/text_data.dart';
+//import 'package:iwproject/presentation/providers/reminder_listener_provider.dart';
 
 class NotificationListScreen extends StatelessWidget {
   const NotificationListScreen({super.key});
@@ -16,10 +16,10 @@ class NotificationListScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     //
-    setInitialReminders(List<ReminderModel> reminders) {
-      final controllerReminders = context.read<ReminderListenerProvider>();
-      controllerReminders.setInitialReminders(reminders);
-    }
+    // setInitialReminders(List<ReminderModel> reminders) {
+    //   final controllerReminders = context.read<ReminderListenerProvider>();
+    //   controllerReminders.setInitialReminders(reminders);
+    // }
 
     newReminderButton() {
       Navigator.push(
@@ -33,9 +33,9 @@ class NotificationListScreen extends StatelessWidget {
       controller.logOut();
     }
 
-    final listener = context.read<ReminderListenerProvider>();
-    final controllerNotification = context.read<NotificationProvider>();
-    listener.startListening(context, controllerNotification.currentUser!.id);
+    // final listener = context.read<ReminderListenerProvider>();
+    // final controllerNotification = context.read<NotificationProvider>();
+    // listener.startListening(context, controllerNotification.currentUser!.id);
 
     return Scaffold(
       backgroundColor: const Color(0xFFF9FAFB),
@@ -51,11 +51,7 @@ class NotificationListScreen extends StatelessWidget {
               children: [
                 ClipRRect(
                   borderRadius: BorderRadius.all(Radius.circular(35)),
-                  child: Image.network(
-                    currentUser!.photo,
-                    height: 35,
-                    width: 35,
-                  ),
+                  child: Image.asset(currentUser!.photo, height: 35, width: 35),
                 ),
                 SizedBox(width: 12),
                 Text(
@@ -130,12 +126,12 @@ class NotificationListScreen extends StatelessWidget {
                             stream: selectedReceiverMainList == null
                                 ? FirebaseFirestore.instance
                                       .collection(
-                                        ConstantData.reminderCollectionDev,
+                                        ConstantData.reminderCollection,
                                       )
                                       .snapshots()
                                 : FirebaseFirestore.instance
                                       .collection(
-                                        ConstantData.reminderCollectionDev,
+                                        ConstantData.reminderCollection,
                                       )
                                       .where(
                                         ConstantData.reminderReceiverId,
@@ -178,7 +174,7 @@ class NotificationListScreen extends StatelessWidget {
                                 (a, b) => b.date.compareTo(a.date),
                               );
 
-                              setInitialReminders(reminders);
+                              //setInitialReminders(reminders);
 
                               return Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,

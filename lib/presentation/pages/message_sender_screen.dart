@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:iwproject/domain/models/reminder_model.dart';
 import 'package:iwproject/presentation/providers/notification_provider.dart';
-import 'package:iwproject/presentation/providers/reminder_listener_provider.dart';
 import 'package:iwproject/presentation/widgets/users_dropdown.dart';
 import 'package:iwproject/utils/text_data.dart';
+//import 'package:iwproject/presentation/providers/reminder_listener_provider.dart';
 
 class MessageSenderScreen extends StatelessWidget {
   final ReminderModel? reminder;
@@ -34,9 +34,9 @@ class MessageSenderScreen extends StatelessWidget {
       });
     }
 
-    final listener = context.read<ReminderListenerProvider>();
-    final controllerNotification = context.read<NotificationProvider>();
-    listener.startListening(context, controllerNotification.currentUser!.id);
+    // final listener = context.read<ReminderListenerProvider>();
+    // final controllerNotification = context.read<NotificationProvider>();
+    // listener.startListening(context, controllerNotification.currentUser!.id);
 
     return PopScope(
       canPop: true,

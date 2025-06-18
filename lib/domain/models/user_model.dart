@@ -10,6 +10,6 @@ class UserModel {
   factory UserModel.fromJson(Map<String, dynamic> json) => UserModel(
     id: json[ConstantData.userId] ?? '',
     name: json[ConstantData.userName] ?? '',
-    photo: json[ConstantData.userPhoto] ?? ConstantData.defaultUserImage,
+    photo: "assets/iwers/${json[ConstantData.userId]}.jpg",
   );
 }
