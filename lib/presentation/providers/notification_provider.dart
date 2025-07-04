@@ -21,6 +21,10 @@ class NotificationProvider with ChangeNotifier {
   UserModel? selectedSender;
   UserModel? selectedReceiver;
   UserModel? selectedReceiverMainList;
+
+  List<UserModel> selectedReceivers = [];
+  List<UserModel> selectedReceiversMainList = [];
+
   String? priority;
 
   void setPriority(String selectedPriority) {
@@ -63,11 +67,6 @@ class NotificationProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  // void setSender(UserModel? user) {
-  //   selectedSender = user;
-  //   notifyListeners();
-  // }
-
   void setReceiver(UserModel? user) {
     selectedReceiver = user;
     notifyListeners();
@@ -78,25 +77,46 @@ class NotificationProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  void setReceivers(List<UserModel> userList) {
+    selectedReceivers = userList;
+    notifyListeners();
+  }
+
+  void setMainListReceivers(List<UserModel> userList) {
+    selectedReceiversMainList = userList;
+    notifyListeners();
+  }
+
   Future<bool> saveReminder() async {
     if (!formKey.currentState!.validate()) return false;
-    //if (selectedSender == null || selectedReceiver == null) return false;
 
     isLoading = true;
     notifyListeners();
 
     try {
-      final remindersRef = FirebaseFirestore.instance.collection(
-        ConstantData.reminderCollection,
-      );
+      final remindersRef = FirebaseFirestore.instance.collection(ConstantData.reminderCollection);
+
+      DateTime finalDate = DateTime.now();
+      if (editingReminderId != null) {
+        final snapshot = await remindersRef.doc(editingReminderId).get();
+        if (snapshot.exists && snapshot.data()?['date'] != null) {
+          final rawDate = snapshot.data()!['date'];
+          if (rawDate is Timestamp) {
+            finalDate = rawDate.toDate();
+          } else if (rawDate is String) {
+            finalDate = DateTime.tryParse(rawDate) ?? DateTime.now(); 
+          }
+        }
+      }
 
       final reminderData = ReminderModel(
-        date: DateTime.now(),
+        date: finalDate,
         deadline: ConstantData.onlyDateFormat.parse(deadlineCtrl.text),
         priority: priority!,
         content: contenidoCtrl.text.trim(),
         senderId: selectedSender!.id,
-        receiverId: selectedReceiver!.id,
+        receiverId: selectedReceiver?.id,
+        receiversIds: selectedReceivers.map((u) => u.id).toList(),
         completed: false,
       ).toJson();
 
@@ -123,9 +143,30 @@ class NotificationProvider with ChangeNotifier {
     contenidoCtrl.text = reminder.content;
     deadlineCtrl.text = ConstantData.onlyDateFormat.format(reminder.deadline);
     priority = reminder.priority;
+
     try {
       selectedSender = users.firstWhere((u) => u.id == reminder.senderId);
-      selectedReceiver = users.firstWhere((u) => u.id == reminder.receiverId);
+
+      if (reminder.receiverId != null) {
+        selectedReceiver = users.firstWhere(
+          (u) => u.id == reminder.receiverId,
+          orElse: () => users.first,
+        );
+      }
+
+      final receivers = users.where((u) => reminder.receiversIds?.contains(u.id) ?? false).toList();
+      selectedReceivers = receivers;
+
+      if (receivers.isNotEmpty) {
+        selectedReceiversMainList = receivers;
+      } else if (reminder.receiverId != null) {
+        final fallbackUser = users.firstWhere(
+          (u) => u.id == reminder.receiverId,
+          orElse: () => users.first,
+        );
+        selectedReceiversMainList = [fallbackUser];
+      }
+
     } catch (e) {
       debugPrint("Error al encontrar usuarios para edición: $e");
     }
@@ -135,18 +176,15 @@ class NotificationProvider with ChangeNotifier {
 
   void clearForm() {
     contenidoCtrl.clear();
-    // selectedSender = currentUser;
     selectedReceiver = null;
+    selectedReceivers = [];
     editingReminderId = null;
     deadlineCtrl.text = ConstantData.onlyDateFormat.format(DateTime.now());
     priority = null;
     notifyListeners();
   }
 
-  Future<void> toggleReminderCompletion(
-    String reminderId,
-    bool currentStatus,
-  ) async {
+  Future<void> toggleReminderCompletion(String reminderId, bool currentStatus) async {
     try {
       await FirebaseFirestore.instance
           .collection(ConstantData.reminderCollection)
@@ -157,4 +195,15 @@ class NotificationProvider with ChangeNotifier {
       rethrow;
     }
   }
+
+  List<ReminderModel> filterRemindersByUser(List<ReminderModel> allReminders, UserModel? user) {
+    if (user == null) return [];
+
+    return allReminders.where((r) {
+      final matchSingle = r.receiverId == user.id;
+      final matchMultiple = r.receiversIds?.contains(user.id) ?? false;
+      return matchSingle || matchMultiple;
+    }).toList();
+  }
+
 }

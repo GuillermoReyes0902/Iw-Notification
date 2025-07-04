@@ -16,7 +16,6 @@ class UsersDropDown extends StatelessWidget {
     return Consumer<NotificationProvider>(
       builder: (context, controller, _) {
         final List<DropdownMenuItem<UserModel>> items = [];
-        // Opción "Todos" solo si está activado
         if (origin == DropDownOrigin.mainlist) {
           items.add(
             DropdownMenuItem<UserModel>(
@@ -32,7 +31,6 @@ class UsersDropDown extends StatelessWidget {
           );
         }
 
-        // Lista normal de usuarios
         items.addAll(
           controller.users.map(
             (user) => DropdownMenuItem<UserModel>(
@@ -46,11 +44,7 @@ class UsersDropDown extends StatelessWidget {
           value: origin == DropDownOrigin.receiver
               ? controller.selectedReceiver
               : controller.selectedReceiverMainList,
-          decoration: const InputDecoration(
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.all(Radius.circular(8)),
-            ),
-          ),
+          decoration: const InputDecoration(border: OutlineInputBorder()),
           items: items,
           onChanged: (value) => origin == DropDownOrigin.receiver
               ? controller.setReceiver(value)
