@@ -70,23 +70,35 @@ class ReminderItem extends StatelessWidget {
                       const SizedBox(width: 6),
                       Consumer<NotificationProvider>(
                         builder: (context, controller, _) {
-                          if (controller.users.isNotEmpty) {
-                            final sender = controller.users.firstWhere(
-                              (user) => user.id == reminder.senderId,
-                            );
+                          if (controller.users.isEmpty) return const SizedBox();
+
+                          final sender = controller.users.firstWhere(
+                            (user) => user.id == reminder.senderId,
+                            orElse: () => UserModel(id: '', name: 'Desconocido', photo: ''),
+                          );
+
+                          String receiversText = '';
+                          if (reminder.receiversIds != null && reminder.receiversIds!.isNotEmpty) {
+                            final receivers = controller.users
+                                .where((u) => reminder.receiversIds!.contains(u.id))
+                                .toList();
+
+                            receiversText = receivers.map((u) => u.name).join(', ');
+                          } else {
                             final receiver = controller.users.firstWhere(
                               (user) => user.id == reminder.receiverId,
+                              orElse: () => UserModel(id: '', name: 'Desconocido', photo: ''),
                             );
-                            return Text(
-                              "${TextData.sender}${sender.name}\n${TextData.receiver}${receiver.name}",
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w600,
-                                color: Colors.black87,
-                              ),
-                            );
-                          } else {
-                            return SizedBox();
+                            receiversText = receiver.name;
                           }
+
+                          return Text(
+                            "${TextData.sender}${sender.name}\n${TextData.receiver}$receiversText",
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black87,
+                            ),
+                          );
                         },
                       ),
                     ],

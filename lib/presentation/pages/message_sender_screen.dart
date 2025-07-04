@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:iwproject/domain/models/reminder_model.dart';
 import 'package:iwproject/presentation/providers/notification_provider.dart';
-import 'package:iwproject/presentation/widgets/users_dropdown.dart';
+import 'package:iwproject/presentation/widgets/users_dropdown_select.dart';
 import 'package:iwproject/utils/text_data.dart';
 //import 'package:iwproject/presentation/providers/reminder_listener_provider.dart';
 
@@ -27,7 +27,6 @@ class MessageSenderScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = context.read<NotificationProvider>();
 
-    // Si viene recordatorio, carga datos en el formulario
     if (reminder != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         controller.setReminderDataForEditing(reminder!);
@@ -164,7 +163,7 @@ class MessageSenderScreen extends StatelessWidget {
                                                         .text,
                                                   ),
                                               firstDate:
-                                                  DateTime.now(), // Solo fechas futuras
+                                                  DateTime.now(), 
                                               lastDate: DateTime(2100),
                                             ).then((selectedDate) {
                                               if (selectedDate is DateTime) {
