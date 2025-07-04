@@ -34,10 +34,6 @@ class MessageSenderScreen extends StatelessWidget {
       });
     }
 
-    // final listener = context.read<ReminderListenerProvider>();
-    // final controllerNotification = context.read<NotificationProvider>();
-    // listener.startListening(context, controllerNotification.currentUser!.id);
-
     return PopScope(
       canPop: true,
       onPopInvokedWithResult: (didPop, _) {
@@ -100,7 +96,7 @@ class MessageSenderScreen extends StatelessWidget {
                           TextData.messageSenderSubtitle,
                           style: TextStyle(color: Colors.grey),
                         ),
-                        const SizedBox(height: 14),
+                        const SizedBox(height: 16),
                         Consumer<NotificationProvider>(
                           builder: (context, controller, _) {
                             return Form(
@@ -118,7 +114,8 @@ class MessageSenderScreen extends StatelessWidget {
                                   const UsersDropDown(
                                     origin: DropDownOrigin.receiver,
                                   ),
-                                  const SizedBox(height: 8),
+                                  const SizedBox(height: 16),
+
                                   const Text(
                                     TextData.content,
                                     style: TextStyle(
@@ -126,6 +123,7 @@ class MessageSenderScreen extends StatelessWidget {
                                     ),
                                   ),
                                   const SizedBox(height: 8),
+
                                   TextFormField(
                                     controller: controller.contenidoCtrl,
                                     maxLines: 6,
@@ -139,6 +137,91 @@ class MessageSenderScreen extends StatelessWidget {
                                         value == null || value.isEmpty
                                         ? TextData.contentValidator
                                         : null,
+                                  ),
+                                  const SizedBox(height: 16),
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceEvenly,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: [
+                                      const Text(
+                                        TextData.deadline,
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                      Expanded(
+                                        child: GestureDetector(
+                                          onTap: () async {
+                                            await showDatePicker(
+                                              context: context,
+                                              initialDate: ConstantData
+                                                  .onlyDateFormat
+                                                  .parse(
+                                                    controller
+                                                        .deadlineCtrl
+                                                        .text,
+                                                  ),
+                                              firstDate:
+                                                  DateTime.now(), // Solo fechas futuras
+                                              lastDate: DateTime(2100),
+                                            ).then((selectedDate) {
+                                              if (selectedDate is DateTime) {
+                                                controller.setDeadline(
+                                                  selectedDate,
+                                                );
+                                              }
+                                            });
+                                          },
+                                          child: AbsorbPointer(
+                                            child: TextFormField(
+                                              readOnly: true,
+                                              decoration: InputDecoration(
+                                                border: OutlineInputBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(8),
+                                                ),
+                                              ),
+                                              controller:
+                                                  controller.deadlineCtrl,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      const Text(
+                                        TextData.priority,
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                      Expanded(
+                                        child: DropdownButtonFormField<String>(
+                                          value: controller.priority,
+                                          decoration: const InputDecoration(
+                                            border: OutlineInputBorder(
+                                              borderRadius: BorderRadius.all(
+                                                Radius.circular(8),
+                                              ),
+                                            ),
+                                          ),
+                                          items: TextData.priorityList
+                                              .map(
+                                                (priority) =>
+                                                    DropdownMenuItem<String>(
+                                                      value: priority,
+                                                      child: Text(priority),
+                                                    ),
+                                              )
+                                              .toList(),
+                                          onChanged: (value) =>
+                                              controller.setPriority(value!),
+                                          validator: (value) => (value == null)
+                                              ? TextData.priorityValidator
+                                              : null,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                   const SizedBox(height: 24),
                                   SizedBox(

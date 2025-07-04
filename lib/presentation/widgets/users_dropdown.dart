@@ -46,7 +46,11 @@ class UsersDropDown extends StatelessWidget {
           value: origin == DropDownOrigin.receiver
               ? controller.selectedReceiver
               : controller.selectedReceiverMainList,
-          decoration: const InputDecoration(border: OutlineInputBorder()),
+          decoration: const InputDecoration(
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.all(Radius.circular(8)),
+            ),
+          ),
           items: items,
           onChanged: (value) => origin == DropDownOrigin.receiver
               ? controller.setReceiver(value)
