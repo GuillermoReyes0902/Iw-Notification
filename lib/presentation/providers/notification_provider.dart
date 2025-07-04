@@ -8,6 +8,9 @@ import 'package:iwproject/utils/text_data.dart';
 class NotificationProvider with ChangeNotifier {
   final formKey = GlobalKey<FormState>();
   final TextEditingController contenidoCtrl = TextEditingController();
+  final TextEditingController deadlineCtrl = TextEditingController(
+    text: ConstantData.onlyDateFormat.format(DateTime.now()),
+  );
 
   UserModel? currentUser;
 
@@ -18,6 +21,17 @@ class NotificationProvider with ChangeNotifier {
   UserModel? selectedSender;
   UserModel? selectedReceiver;
   UserModel? selectedReceiverMainList;
+  String? priority;
+
+  void setPriority(String selectedPriority) {
+    priority = selectedPriority;
+    notifyListeners();
+  }
+
+  void setDeadline(DateTime selectedDate) {
+    deadlineCtrl.text = ConstantData.onlyDateFormat.format(selectedDate);
+    notifyListeners();
+  }
 
   Future<void> logIn(UserModel selectedUser) async {
     await SharedPreferencesHandler.setUser(selectedUser);
@@ -49,10 +63,10 @@ class NotificationProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  void setSender(UserModel? user) {
-    selectedSender = user;
-    notifyListeners();
-  }
+  // void setSender(UserModel? user) {
+  //   selectedSender = user;
+  //   notifyListeners();
+  // }
 
   void setReceiver(UserModel? user) {
     selectedReceiver = user;
@@ -66,7 +80,7 @@ class NotificationProvider with ChangeNotifier {
 
   Future<bool> saveReminder() async {
     if (!formKey.currentState!.validate()) return false;
-    if (selectedSender == null || selectedReceiver == null) return false;
+    //if (selectedSender == null || selectedReceiver == null) return false;
 
     isLoading = true;
     notifyListeners();
@@ -78,6 +92,8 @@ class NotificationProvider with ChangeNotifier {
 
       final reminderData = ReminderModel(
         date: DateTime.now(),
+        deadline: ConstantData.onlyDateFormat.parse(deadlineCtrl.text),
+        priority: priority!,
         content: contenidoCtrl.text.trim(),
         senderId: selectedSender!.id,
         receiverId: selectedReceiver!.id,
@@ -105,7 +121,8 @@ class NotificationProvider with ChangeNotifier {
   void setReminderDataForEditing(ReminderModel reminder) {
     editingReminderId = reminder.id;
     contenidoCtrl.text = reminder.content;
-
+    deadlineCtrl.text = ConstantData.onlyDateFormat.format(reminder.deadline);
+    priority = reminder.priority;
     try {
       selectedSender = users.firstWhere((u) => u.id == reminder.senderId);
       selectedReceiver = users.firstWhere((u) => u.id == reminder.receiverId);
@@ -118,9 +135,11 @@ class NotificationProvider with ChangeNotifier {
 
   void clearForm() {
     contenidoCtrl.clear();
-    selectedSender = currentUser;
+    // selectedSender = currentUser;
     selectedReceiver = null;
     editingReminderId = null;
+    deadlineCtrl.text = ConstantData.onlyDateFormat.format(DateTime.now());
+    priority = null;
     notifyListeners();
   }
 

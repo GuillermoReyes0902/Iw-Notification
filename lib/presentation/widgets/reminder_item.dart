@@ -136,6 +136,17 @@ class ReminderItem extends StatelessWidget {
                       : null,
                 ),
               ),
+              const SizedBox(height: 12),
+              Text(
+                "Fecha límite: ${ConstantData.onlyDateFormat.format(reminder.deadline)}",
+                textAlign: TextAlign.end,
+                style: const TextStyle(color: Colors.grey, fontSize: 12),
+              ),
+              Text(
+                "Prioridad: ${reminder.priority}",
+                textAlign: TextAlign.end,
+                style: const TextStyle(color: Colors.grey, fontSize: 12),
+              ),
 
               // BOTÓN
               const SizedBox(height: 12),
