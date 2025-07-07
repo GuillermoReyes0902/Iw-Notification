@@ -54,12 +54,14 @@ class ReminderItem extends StatelessWidget {
         ? reminder.status == 'completado'
         : reminder.completed;
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             color: const Color(0xFFF5F5F5),
             borderRadius: BorderRadius.circular(8),
+            border: BoxBorder.all(color: Colors.grey, width: 0.5),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -67,10 +69,10 @@ class ReminderItem extends StatelessWidget {
               // ENCABEZADO
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Row(
                     children: [
-                      const SizedBox(width: 6),
                       Consumer<NotificationProvider>(
                         builder: (context, controller, _) {
                           if (controller.users.isEmpty) return const SizedBox();
@@ -140,7 +142,7 @@ class ReminderItem extends StatelessWidget {
                         ],
                       ),
                       Text(
-                        "\n${ConstantData.dateFormat.format(reminder.date)}",
+                        ConstantData.dateFormat.format(reminder.date),
                         textAlign: TextAlign.end,
                         style: const TextStyle(
                           color: Colors.grey,
@@ -160,9 +162,13 @@ class ReminderItem extends StatelessWidget {
                 style: TextStyle(
                   color: isCompleted ? Colors.grey : Colors.black87,
                   decoration: isCompleted ? TextDecoration.lineThrough : null,
+                  decorationColor: Colors.grey,
+                  fontSize: 18,
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 10),
+              Divider(),
+              const SizedBox(height: 10),
               Text(
                 "Fecha límite: ${ConstantData.onlyDateFormat.format(reminder.deadline)}",
                 textAlign: TextAlign.end,
@@ -183,6 +189,30 @@ class ReminderItem extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        "Fecha límite: ${ConstantData.onlyDateFormat.format(reminder.deadline)} ${DateUtils.dateOnly(reminder.deadline).isBefore(DateUtils.dateOnly(DateTime.now())) ? "(Caducado)" : ""}",
+                        //TODO añadir verificación solo si el recordatorio no está marcado como completado
+                        style: TextStyle(
+                          color:
+                              DateUtils.dateOnly(
+                                reminder.deadline,
+                              ).isBefore(DateUtils.dateOnly(DateTime.now()))
+                              ? Colors.red
+                              : Colors.grey,
+                        ),
+                      ),
+                      Text(
+                        "Prioridad: ${reminder.priority}",
+                        textAlign: TextAlign.end,
+                        style: const TextStyle(color: Colors.grey),
+                      ),
+                    ],
+                  ),
+                  Spacer(),
                   Selector<NotificationProvider, UserModel?>(
                     selector: (_, controller) => controller.currentUser,
                     builder: (_, currentUser, _) {
@@ -212,9 +242,11 @@ class ReminderItem extends StatelessWidget {
                     selector: (_, controller) => controller.currentUser,
                     builder: (_, currentUser, _) {
                       final isReceiver =
-                          reminder.receiverId == currentUser?.id ||
-                          (reminder.receiversIds?.contains(currentUser?.id) ??
-                              false);
+                          (reminder.receiverId != null &&
+                              currentUser?.id == reminder.receiverId) ||
+                          (reminder.receiversIds != null &&
+                              reminder.receiversIds!.isNotEmpty &&
+                              currentUser?.id == reminder.receiversIds!.first);
                       if (!isReceiver) return const SizedBox();
                       if (reminder.stateVersion == 'v2') {
                         final currentStatus = reminder.status ?? 'pendiente';
@@ -291,10 +323,7 @@ class ReminderItem extends StatelessWidget {
         ),
 
         if (isLastReminder)
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 12),
-            child: Divider(),
-          ),
+          const Padding(padding: EdgeInsets.symmetric(vertical: 12)),
       ],
     );
   }

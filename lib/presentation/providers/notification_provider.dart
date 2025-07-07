@@ -94,9 +94,20 @@ class NotificationProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      final remindersRef = FirebaseFirestore.instance.collection(
-        ConstantData.reminderCollection,
-      );
+      final remindersRef = FirebaseFirestore.instance.collection(ConstantData.reminderCollection);
+
+      DateTime finalDate = DateTime.now();
+      if (editingReminderId != null) {
+        final snapshot = await remindersRef.doc(editingReminderId).get();
+        if (snapshot.exists && snapshot.data()?['date'] != null) {
+          final rawDate = snapshot.data()!['date'];
+          if (rawDate is Timestamp) {
+            finalDate = rawDate.toDate();
+          } else if (rawDate is String) {
+            finalDate = DateTime.tryParse(rawDate) ?? DateTime.now(); 
+          }
+        }
+      }
 
       DateTime finalDate = DateTime.now();
       if (editingReminderId != null) {
@@ -157,6 +168,7 @@ class NotificationProvider with ChangeNotifier {
         );
       }
 
+
       final receivers = users
           .where((u) => reminder.receiversIds?.contains(u.id) ?? false)
           .toList();
@@ -188,10 +200,7 @@ class NotificationProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> toggleReminderCompletion(
-    String reminderId,
-    bool currentStatus,
-  ) async {
+  Future<void> toggleReminderCompletion(String reminderId, bool currentStatus) async {
     try {
       await FirebaseFirestore.instance
           .collection(ConstantData.reminderCollection)
@@ -215,4 +224,5 @@ class NotificationProvider with ChangeNotifier {
       return matchSingle || matchMultiple;
     }).toList();
   }
+
 }
