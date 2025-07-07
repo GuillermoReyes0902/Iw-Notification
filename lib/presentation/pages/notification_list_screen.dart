@@ -123,27 +123,12 @@ class NotificationListScreen extends StatelessWidget {
                             controller.selectedReceiverMainList,
                         builder: (_, selectedReceiverMainList, _) {
                           return StreamBuilder<QuerySnapshot>(
-                            stream: selectedReceiverMainList == null
-                                ? FirebaseFirestore.instance
-                                      .collection(
-                                        ConstantData.reminderCollection,
-                                      )
-                                      .snapshots()
-                                : FirebaseFirestore.instance
-                                      .collection(
-                                        ConstantData.reminderCollection,
-                                      )
-                                      .where(
-                                        ConstantData.reminderReceiverId,
-                                        isEqualTo: selectedReceiverMainList.id,
-                                      )
-                                      .snapshots(),
+                            stream: FirebaseFirestore.instance
+                                .collection(ConstantData.reminderCollection)
+                                .snapshots(),
                             builder: (context, snapshot) {
                               if (snapshot.hasError) {
-                                return Text(
-                                  'Error: ${snapshot.error}',
-                                  style: const TextStyle(color: Colors.grey),
-                                );
+                                return Text('Error: ${snapshot.error}');
                               }
 
                               if (snapshot.connectionState ==
@@ -163,18 +148,31 @@ class NotificationListScreen extends StatelessWidget {
                                 );
                               }
 
-                              final reminders = docs.map((doc) {
+                              final allReminders = docs.map((doc) {
                                 final data = doc.data() as Map<String, dynamic>;
                                 return ReminderModel.fromJson({
                                   ConstantData.reminderId: doc.id,
                                   ...data,
                                 });
                               }).toList();
-                              reminders.sort(
+
+                              allReminders.sort(
                                 (a, b) => b.date.compareTo(a.date),
                               );
 
-                              //setInitialReminders(reminders);
+                              final reminders = selectedReceiverMainList == null
+                                  ? allReminders
+                                  : allReminders.where((r) {
+                                      final matchSingle =
+                                          r.receiverId ==
+                                          selectedReceiverMainList.id;
+                                      final matchMultiple =
+                                          r.receiversIds?.contains(
+                                            selectedReceiverMainList.id,
+                                          ) ??
+                                          false;
+                                      return matchSingle || matchMultiple;
+                                    }).toList();
 
                               return Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,

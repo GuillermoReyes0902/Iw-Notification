@@ -46,6 +46,7 @@ dependencies:
   launch_at_startup: ^0.5.1
   cloud_firestore: ^5.6.9
   shared_preferences: ^2.5.3
+  dropdown_search: ^5.0.6
 
 
 dev_dependencies:

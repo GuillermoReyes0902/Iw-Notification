@@ -53,6 +53,7 @@ class ConstantData {
   static const String reminderContent = "content";
   static const String reminderSenderId = "senderId";
   static const String reminderReceiverId = "receiverId";
+  static const String reminderReceiversIds= "receiversIds";
   static const String reminderCompleted = "completed";
   //
   static const String userCollection = "users";
