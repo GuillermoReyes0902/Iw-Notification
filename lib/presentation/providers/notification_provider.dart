@@ -109,6 +109,19 @@ class NotificationProvider with ChangeNotifier {
         }
       }
 
+      DateTime finalDate = DateTime.now();
+      if (editingReminderId != null) {
+        final snapshot = await remindersRef.doc(editingReminderId).get();
+        if (snapshot.exists && snapshot.data()?['date'] != null) {
+          final rawDate = snapshot.data()!['date'];
+          if (rawDate is Timestamp) {
+            finalDate = rawDate.toDate();
+          } else if (rawDate is String) {
+            finalDate = DateTime.tryParse(rawDate) ?? DateTime.now();
+          }
+        }
+      }
+
       final reminderData = ReminderModel(
         date: finalDate,
         deadline: ConstantData.onlyDateFormat.parse(deadlineCtrl.text),
@@ -118,6 +131,7 @@ class NotificationProvider with ChangeNotifier {
         receiverId: selectedReceiver?.id,
         receiversIds: selectedReceivers.map((u) => u.id).toList(),
         completed: false,
+        stateVersion: 'v2', 
       ).toJson();
 
       if (editingReminderId != null) {
@@ -154,7 +168,10 @@ class NotificationProvider with ChangeNotifier {
         );
       }
 
-      final receivers = users.where((u) => reminder.receiversIds?.contains(u.id) ?? false).toList();
+
+      final receivers = users
+          .where((u) => reminder.receiversIds?.contains(u.id) ?? false)
+          .toList();
       selectedReceivers = receivers;
 
       if (receivers.isNotEmpty) {
@@ -166,7 +183,6 @@ class NotificationProvider with ChangeNotifier {
         );
         selectedReceiversMainList = [fallbackUser];
       }
-
     } catch (e) {
       debugPrint("Error al encontrar usuarios para edición: $e");
     }
@@ -196,7 +212,10 @@ class NotificationProvider with ChangeNotifier {
     }
   }
 
-  List<ReminderModel> filterRemindersByUser(List<ReminderModel> allReminders, UserModel? user) {
+  List<ReminderModel> filterRemindersByUser(
+    List<ReminderModel> allReminders,
+    UserModel? user,
+  ) {
     if (user == null) return [];
 
     return allReminders.where((r) {

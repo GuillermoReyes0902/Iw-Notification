@@ -50,6 +50,9 @@ class ReminderItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isCompleted = reminder.stateVersion == 'v2'
+        ? reminder.status == 'completado'
+        : reminder.completed;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -157,10 +160,8 @@ class ReminderItem extends StatelessWidget {
               Text(
                 reminder.content,
                 style: TextStyle(
-                  color: reminder.completed ? Colors.grey : Colors.black87,
-                  decoration: reminder.completed
-                      ? TextDecoration.lineThrough
-                      : null,
+                  color: isCompleted ? Colors.grey : Colors.black87,
+                  decoration: isCompleted ? TextDecoration.lineThrough : null,
                   decorationColor: Colors.grey,
                   fontSize: 18,
                 ),
@@ -168,6 +169,23 @@ class ReminderItem extends StatelessWidget {
               const SizedBox(height: 10),
               Divider(),
               const SizedBox(height: 10),
+              Text(
+                "Fecha límite: ${ConstantData.onlyDateFormat.format(reminder.deadline)}",
+                textAlign: TextAlign.end,
+                style: const TextStyle(color: Colors.grey, fontSize: 12),
+              ),
+              Text(
+                "Prioridad: ${reminder.priority}",
+                textAlign: TextAlign.end,
+                style: TextStyle(
+                  color:
+                      TextData.priorityColors[reminder.priority] ?? Colors.grey,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+
+              const SizedBox(height: 12),
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
@@ -230,25 +248,72 @@ class ReminderItem extends StatelessWidget {
                               reminder.receiversIds!.isNotEmpty &&
                               currentUser?.id == reminder.receiversIds!.first);
                       if (!isReceiver) return const SizedBox();
-                      return TextButton.icon(
-                        onPressed: () => markAsCompleted(context),
-                        icon: Icon(
-                          reminder.completed
-                              ? Icons.check_circle
-                              : Icons.radio_button_unchecked,
-                          size: 18,
-                        ),
-                        label: Text(
-                          reminder.completed
-                              ? TextData.completedState[0]
-                              : TextData.completedState[1],
-                        ),
-                        style: TextButton.styleFrom(
-                          foregroundColor: reminder.completed
-                              ? Colors.green
-                              : Colors.black54,
-                        ),
-                      );
+                      if (reminder.stateVersion == 'v2') {
+                        final currentStatus = reminder.status ?? 'pendiente';
+
+                        Color getStatusColor(String status) {
+                          switch (status) {
+                            case 'completado':
+                              return Colors.green;
+                            case 'en_curso':
+                              return Colors.orange;
+                            case 'pendiente':
+                            default:
+                              return Colors.red;
+                          }
+                        }
+
+                        return DropdownButton<String>(
+                          value: currentStatus,
+                          items: TextData.statusOptions.map((statusValue) {
+                            return DropdownMenuItem<String>(
+                              value: statusValue,
+                              child: Text(
+                                TextData.statusLabels[statusValue]!,
+                                style: TextStyle(
+                                  color: getStatusColor(statusValue),
+                                ), 
+                              ),
+                            );
+                          }).toList(),
+                          onChanged: (String? newValue) async {
+                            if (newValue == null) return;
+                            await FirebaseFirestore.instance
+                                .collection(ConstantData.reminderCollection)
+                                .doc(reminder.id)
+                                .update({'status': newValue});
+                          },
+                          underline: const SizedBox(),
+                          style: TextStyle(
+                            color: getStatusColor(currentStatus),
+                          ), 
+                          dropdownColor: Colors.white,
+                          iconEnabledColor: getStatusColor(
+                            currentStatus,
+                          ), 
+                        );
+                      } else {
+                        return TextButton.icon(
+                          onPressed: () => markAsCompleted(context),
+                          icon: Icon(
+                            reminder.completed
+                                ? Icons.check_circle
+                                : Icons.radio_button_unchecked,
+                            size: 18,
+                          ),
+                          label: Text(
+                            TextData.getCompletedLabel(
+                              reminder.completed,
+                              stateVersion: reminder.stateVersion,
+                            ),
+                          ),
+                          style: TextButton.styleFrom(
+                            foregroundColor: reminder.completed
+                                ? Colors.green
+                                : Colors.black54,
+                          ),
+                        );
+                      }
                     },
                   ),
                 ],
