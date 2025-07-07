@@ -109,6 +109,10 @@ class MessageSenderScreen extends StatelessWidget {
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),
+                                  const Text(
+                                    "(Solo el primer miembro de la lista podrá modificar el status del recordatorio)",
+                                    style: TextStyle(color: Colors.grey),
+                                  ),
                                   const SizedBox(height: 8),
                                   const UsersDropDown(
                                     origin: DropDownOrigin.receiver,
@@ -162,8 +166,7 @@ class MessageSenderScreen extends StatelessWidget {
                                                         .deadlineCtrl
                                                         .text,
                                                   ),
-                                              firstDate:
-                                                  DateTime.now(), 
+                                              firstDate: DateTime.now(),
                                               lastDate: DateTime(2100),
                                             ).then((selectedDate) {
                                               if (selectedDate is DateTime) {

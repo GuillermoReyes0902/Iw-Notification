@@ -51,12 +51,14 @@ class ReminderItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             color: const Color(0xFFF5F5F5),
             borderRadius: BorderRadius.circular(8),
+            border: BoxBorder.all(color: Colors.grey, width: 0.5),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -64,30 +66,43 @@ class ReminderItem extends StatelessWidget {
               // ENCABEZADO
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Row(
                     children: [
-                      const SizedBox(width: 6),
                       Consumer<NotificationProvider>(
                         builder: (context, controller, _) {
                           if (controller.users.isEmpty) return const SizedBox();
 
                           final sender = controller.users.firstWhere(
                             (user) => user.id == reminder.senderId,
-                            orElse: () => UserModel(id: '', name: 'Desconocido', photo: ''),
+                            orElse: () => UserModel(
+                              id: '',
+                              name: 'Desconocido',
+                              photo: '',
+                            ),
                           );
 
                           String receiversText = '';
-                          if (reminder.receiversIds != null && reminder.receiversIds!.isNotEmpty) {
+                          if (reminder.receiversIds != null &&
+                              reminder.receiversIds!.isNotEmpty) {
                             final receivers = controller.users
-                                .where((u) => reminder.receiversIds!.contains(u.id))
+                                .where(
+                                  (u) => reminder.receiversIds!.contains(u.id),
+                                )
                                 .toList();
 
-                            receiversText = receivers.map((u) => u.name).join(', ');
+                            receiversText = receivers
+                                .map((u) => u.name)
+                                .join(', ');
                           } else {
                             final receiver = controller.users.firstWhere(
                               (user) => user.id == reminder.receiverId,
-                              orElse: () => UserModel(id: '', name: 'Desconocido', photo: ''),
+                              orElse: () => UserModel(
+                                id: '',
+                                name: 'Desconocido',
+                                photo: '',
+                              ),
                             );
                             receiversText = receiver.name;
                           }
@@ -124,7 +139,7 @@ class ReminderItem extends StatelessWidget {
                         ],
                       ),
                       Text(
-                        "\n${ConstantData.dateFormat.format(reminder.date)}",
+                        ConstantData.dateFormat.format(reminder.date),
                         textAlign: TextAlign.end,
                         style: const TextStyle(
                           color: Colors.grey,
@@ -146,25 +161,40 @@ class ReminderItem extends StatelessWidget {
                   decoration: reminder.completed
                       ? TextDecoration.lineThrough
                       : null,
+                  decorationColor: Colors.grey,
+                  fontSize: 18,
                 ),
               ),
-              const SizedBox(height: 12),
-              Text(
-                "Fecha límite: ${ConstantData.onlyDateFormat.format(reminder.deadline)}",
-                textAlign: TextAlign.end,
-                style: const TextStyle(color: Colors.grey, fontSize: 12),
-              ),
-              Text(
-                "Prioridad: ${reminder.priority}",
-                textAlign: TextAlign.end,
-                style: const TextStyle(color: Colors.grey, fontSize: 12),
-              ),
-
-              // BOTÓN
-              const SizedBox(height: 12),
+              const SizedBox(height: 10),
+              Divider(),
+              const SizedBox(height: 10),
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        "Fecha límite: ${ConstantData.onlyDateFormat.format(reminder.deadline)} ${DateUtils.dateOnly(reminder.deadline).isBefore(DateUtils.dateOnly(DateTime.now())) ? "(Caducado)" : ""}",
+                        //TODO añadir verificación solo si el recordatorio no está marcado como completado
+                        style: TextStyle(
+                          color:
+                              DateUtils.dateOnly(
+                                reminder.deadline,
+                              ).isBefore(DateUtils.dateOnly(DateTime.now()))
+                              ? Colors.red
+                              : Colors.grey,
+                        ),
+                      ),
+                      Text(
+                        "Prioridad: ${reminder.priority}",
+                        textAlign: TextAlign.end,
+                        style: const TextStyle(color: Colors.grey),
+                      ),
+                    ],
+                  ),
+                  Spacer(),
                   Selector<NotificationProvider, UserModel?>(
                     selector: (_, controller) => controller.currentUser,
                     builder: (_, currentUser, _) {
@@ -193,7 +223,12 @@ class ReminderItem extends StatelessWidget {
                   Selector<NotificationProvider, UserModel?>(
                     selector: (_, controller) => controller.currentUser,
                     builder: (_, currentUser, _) {
-                      final isReceiver = currentUser?.id == reminder.receiverId;
+                      final isReceiver =
+                          (reminder.receiverId != null &&
+                              currentUser?.id == reminder.receiverId) ||
+                          (reminder.receiversIds != null &&
+                              reminder.receiversIds!.isNotEmpty &&
+                              currentUser?.id == reminder.receiversIds!.first);
                       if (!isReceiver) return const SizedBox();
                       return TextButton.icon(
                         onPressed: () => markAsCompleted(context),
@@ -223,10 +258,7 @@ class ReminderItem extends StatelessWidget {
         ),
 
         if (isLastReminder)
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 12),
-            child: Divider(),
-          ),
+          const Padding(padding: EdgeInsets.symmetric(vertical: 12)),
       ],
     );
   }
