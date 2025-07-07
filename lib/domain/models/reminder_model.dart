@@ -10,6 +10,8 @@ class ReminderModel {
   String? receiverId; 
   List<String>? receiversIds;
   bool completed;
+  String? stateVersion;
+  String? status;
 
   ReminderModel({
     this.id,
@@ -21,6 +23,8 @@ class ReminderModel {
     this.receiverId, 
     this.receiversIds,
     required this.completed,
+    this.stateVersion,
+    this.status,
   });
 
   factory ReminderModel.fromJson(Map<String, dynamic> json) => ReminderModel(
@@ -33,6 +37,8 @@ class ReminderModel {
         receiverId: json[ConstantData.reminderReceiverId], 
         receiversIds: (json[ConstantData.reminderReceiversIds] as List?)?.cast<String>(),
         completed: json[ConstantData.reminderCompleted] ?? false,
+        stateVersion: json['stateVersion'],
+        status: json['status'],
       );
 
   Map<String, dynamic> toJson() => {
@@ -44,5 +50,7 @@ class ReminderModel {
         ConstantData.reminderReceiverId: receiverId,
         ConstantData.reminderReceiversIds: receiversIds,
         ConstantData.reminderCompleted: completed,
+        'stateVersion': stateVersion ?? 'v1',
+        'status': status ?? 'pendiente',
       };
 }

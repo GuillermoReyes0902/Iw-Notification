@@ -50,6 +50,9 @@ class ReminderItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isCompleted = reminder.stateVersion == 'v2'
+        ? reminder.status == 'completado'
+        : reminder.completed;
     return Column(
       children: [
         Container(
@@ -74,20 +77,33 @@ class ReminderItem extends StatelessWidget {
 
                           final sender = controller.users.firstWhere(
                             (user) => user.id == reminder.senderId,
-                            orElse: () => UserModel(id: '', name: 'Desconocido', photo: ''),
+                            orElse: () => UserModel(
+                              id: '',
+                              name: 'Desconocido',
+                              photo: '',
+                            ),
                           );
 
                           String receiversText = '';
-                          if (reminder.receiversIds != null && reminder.receiversIds!.isNotEmpty) {
+                          if (reminder.receiversIds != null &&
+                              reminder.receiversIds!.isNotEmpty) {
                             final receivers = controller.users
-                                .where((u) => reminder.receiversIds!.contains(u.id))
+                                .where(
+                                  (u) => reminder.receiversIds!.contains(u.id),
+                                )
                                 .toList();
 
-                            receiversText = receivers.map((u) => u.name).join(', ');
+                            receiversText = receivers
+                                .map((u) => u.name)
+                                .join(', ');
                           } else {
                             final receiver = controller.users.firstWhere(
                               (user) => user.id == reminder.receiverId,
-                              orElse: () => UserModel(id: '', name: 'Desconocido', photo: ''),
+                              orElse: () => UserModel(
+                                id: '',
+                                name: 'Desconocido',
+                                photo: '',
+                              ),
                             );
                             receiversText = receiver.name;
                           }
@@ -142,10 +158,8 @@ class ReminderItem extends StatelessWidget {
               Text(
                 reminder.content,
                 style: TextStyle(
-                  color: reminder.completed ? Colors.grey : Colors.black87,
-                  decoration: reminder.completed
-                      ? TextDecoration.lineThrough
-                      : null,
+                  color: isCompleted ? Colors.grey : Colors.black87,
+                  decoration: isCompleted ? TextDecoration.lineThrough : null,
                 ),
               ),
               const SizedBox(height: 12),
@@ -157,10 +171,14 @@ class ReminderItem extends StatelessWidget {
               Text(
                 "Prioridad: ${reminder.priority}",
                 textAlign: TextAlign.end,
-                style: const TextStyle(color: Colors.grey, fontSize: 12),
+                style: TextStyle(
+                  color:
+                      TextData.priorityColors[reminder.priority] ?? Colors.grey,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
 
-              // BOTÓN
               const SizedBox(height: 12),
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
@@ -193,27 +211,77 @@ class ReminderItem extends StatelessWidget {
                   Selector<NotificationProvider, UserModel?>(
                     selector: (_, controller) => controller.currentUser,
                     builder: (_, currentUser, _) {
-                      final isReceiver = currentUser?.id == reminder.receiverId;
+                      final isReceiver =
+                          reminder.receiverId == currentUser?.id ||
+                          (reminder.receiversIds?.contains(currentUser?.id) ??
+                              false);
                       if (!isReceiver) return const SizedBox();
-                      return TextButton.icon(
-                        onPressed: () => markAsCompleted(context),
-                        icon: Icon(
-                          reminder.completed
-                              ? Icons.check_circle
-                              : Icons.radio_button_unchecked,
-                          size: 18,
-                        ),
-                        label: Text(
-                          reminder.completed
-                              ? TextData.completedState[0]
-                              : TextData.completedState[1],
-                        ),
-                        style: TextButton.styleFrom(
-                          foregroundColor: reminder.completed
-                              ? Colors.green
-                              : Colors.black54,
-                        ),
-                      );
+                      if (reminder.stateVersion == 'v2') {
+                        final currentStatus = reminder.status ?? 'pendiente';
+
+                        Color getStatusColor(String status) {
+                          switch (status) {
+                            case 'completado':
+                              return Colors.green;
+                            case 'en_curso':
+                              return Colors.orange;
+                            case 'pendiente':
+                            default:
+                              return Colors.red;
+                          }
+                        }
+
+                        return DropdownButton<String>(
+                          value: currentStatus,
+                          items: TextData.statusOptions.map((statusValue) {
+                            return DropdownMenuItem<String>(
+                              value: statusValue,
+                              child: Text(
+                                TextData.statusLabels[statusValue]!,
+                                style: TextStyle(
+                                  color: getStatusColor(statusValue),
+                                ), 
+                              ),
+                            );
+                          }).toList(),
+                          onChanged: (String? newValue) async {
+                            if (newValue == null) return;
+                            await FirebaseFirestore.instance
+                                .collection(ConstantData.reminderCollection)
+                                .doc(reminder.id)
+                                .update({'status': newValue});
+                          },
+                          underline: const SizedBox(),
+                          style: TextStyle(
+                            color: getStatusColor(currentStatus),
+                          ), 
+                          dropdownColor: Colors.white,
+                          iconEnabledColor: getStatusColor(
+                            currentStatus,
+                          ), 
+                        );
+                      } else {
+                        return TextButton.icon(
+                          onPressed: () => markAsCompleted(context),
+                          icon: Icon(
+                            reminder.completed
+                                ? Icons.check_circle
+                                : Icons.radio_button_unchecked,
+                            size: 18,
+                          ),
+                          label: Text(
+                            TextData.getCompletedLabel(
+                              reminder.completed,
+                              stateVersion: reminder.stateVersion,
+                            ),
+                          ),
+                          style: TextButton.styleFrom(
+                            foregroundColor: reminder.completed
+                                ? Colors.green
+                                : Colors.black54,
+                          ),
+                        );
+                      }
                     },
                   ),
                 ],

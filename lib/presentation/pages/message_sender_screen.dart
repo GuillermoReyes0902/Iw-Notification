@@ -162,8 +162,7 @@ class MessageSenderScreen extends StatelessWidget {
                                                         .deadlineCtrl
                                                         .text,
                                                   ),
-                                              firstDate:
-                                                  DateTime.now(), 
+                                              firstDate: DateTime.now(),
                                               lastDate: DateTime(2100),
                                             ).then((selectedDate) {
                                               if (selectedDate is DateTime) {
@@ -197,6 +196,15 @@ class MessageSenderScreen extends StatelessWidget {
                                       Expanded(
                                         child: DropdownButtonFormField<String>(
                                           value: controller.priority,
+                                          style: TextStyle(
+                                            color:
+                                                TextData
+                                                    .priorityColors[controller
+                                                        .priority ??
+                                                    "Baja"] ??
+                                                Colors.black,
+                                            fontWeight: FontWeight.w600,
+                                          ),
                                           decoration: const InputDecoration(
                                             border: OutlineInputBorder(
                                               borderRadius: BorderRadius.all(
@@ -204,15 +212,23 @@ class MessageSenderScreen extends StatelessWidget {
                                               ),
                                             ),
                                           ),
-                                          items: TextData.priorityList
-                                              .map(
-                                                (priority) =>
-                                                    DropdownMenuItem<String>(
-                                                      value: priority,
-                                                      child: Text(priority),
-                                                    ),
-                                              )
-                                              .toList(),
+                                          items: TextData.priorityList.map((
+                                            priority,
+                                          ) {
+                                            return DropdownMenuItem<String>(
+                                              value: priority,
+                                              child: Text(
+                                                priority,
+                                                style: TextStyle(
+                                                  color:
+                                                      TextData
+                                                          .priorityColors[priority] ??
+                                                      Colors.black,
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                              ),
+                                            );
+                                          }).toList(),
                                           onChanged: (value) =>
                                               controller.setPriority(value!),
                                           validator: (value) => (value == null)
