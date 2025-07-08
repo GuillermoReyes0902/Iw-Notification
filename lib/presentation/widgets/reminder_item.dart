@@ -169,23 +169,6 @@ class ReminderItem extends StatelessWidget {
               const SizedBox(height: 10),
               Divider(),
               const SizedBox(height: 10),
-              Text(
-                "Fecha límite: ${ConstantData.onlyDateFormat.format(reminder.deadline)}",
-                textAlign: TextAlign.end,
-                style: const TextStyle(color: Colors.grey, fontSize: 12),
-              ),
-              Text(
-                "Prioridad: ${reminder.priority}",
-                textAlign: TextAlign.end,
-                style: TextStyle(
-                  color:
-                      TextData.priorityColors[reminder.priority] ?? Colors.grey,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-
-              const SizedBox(height: 12),
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
@@ -203,12 +186,16 @@ class ReminderItem extends StatelessWidget {
                               ).isBefore(DateUtils.dateOnly(DateTime.now()))
                               ? Colors.red
                               : Colors.grey,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                       Text(
                         "Prioridad: ${reminder.priority}",
                         textAlign: TextAlign.end,
-                        style: const TextStyle(color: Colors.grey),
+                        style: TextStyle(
+                          color: TextData.priorityColors[reminder.priority],
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ],
                   ),
@@ -247,32 +234,47 @@ class ReminderItem extends StatelessWidget {
                           (reminder.receiversIds != null &&
                               reminder.receiversIds!.isNotEmpty &&
                               currentUser?.id == reminder.receiversIds!.first);
-                      if (!isReceiver) return const SizedBox();
-                      if (reminder.stateVersion == 'v2') {
-                        final currentStatus = reminder.status ?? 'pendiente';
-
-                        Color getStatusColor(String status) {
-                          switch (status) {
-                            case 'completado':
-                              return Colors.green;
-                            case 'en_curso':
-                              return Colors.orange;
-                            case 'pendiente':
-                            default:
-                              return Colors.red;
-                          }
+                      Color getStatusColor(String status) {
+                        switch (status) {
+                          case 'completado':
+                            return Colors.green;
+                          case 'en_curso':
+                            return Colors.orange;
+                          case 'pendiente':
+                          default:
+                            return Colors.red;
                         }
+                      }
 
+                      if (!isReceiver) {
+                        return Text(
+                          TextData.getCompletedLabel(
+                            reminder.status,
+                            reminder.stateVersion,
+                            isCompleted,
+                          ),
+                          style: TextStyle(
+                            color: getStatusColor(
+                              reminder.status ??
+                                  (isCompleted ? 'completado' : 'pendiente'),
+                            ),
+                          ),
+                        );
+                      }
+                      if (reminder.stateVersion == 'v2') {
                         return DropdownButton<String>(
-                          value: currentStatus,
-                          items: TextData.statusOptions.map((statusValue) {
+                          value: reminder.status,
+                          items: TextData.statusOptions.entries.map((entry) {
+                            final statusValue = entry.key;
+                            final label = entry.value;
+
                             return DropdownMenuItem<String>(
                               value: statusValue,
                               child: Text(
-                                TextData.statusLabels[statusValue]!,
+                                label,
                                 style: TextStyle(
                                   color: getStatusColor(statusValue),
-                                ), 
+                                ),
                               ),
                             );
                           }).toList(),
@@ -285,12 +287,10 @@ class ReminderItem extends StatelessWidget {
                           },
                           underline: const SizedBox(),
                           style: TextStyle(
-                            color: getStatusColor(currentStatus),
-                          ), 
+                            color: getStatusColor(reminder.status!),
+                          ),
                           dropdownColor: Colors.white,
-                          iconEnabledColor: getStatusColor(
-                            currentStatus,
-                          ), 
+                          iconEnabledColor: getStatusColor(reminder.status!),
                         );
                       } else {
                         return TextButton.icon(
@@ -303,8 +303,9 @@ class ReminderItem extends StatelessWidget {
                           ),
                           label: Text(
                             TextData.getCompletedLabel(
-                              reminder.completed,
-                              stateVersion: reminder.stateVersion,
+                              reminder.status,
+                              reminder.stateVersion,
+                              isCompleted,
                             ),
                           ),
                           style: TextButton.styleFrom(
