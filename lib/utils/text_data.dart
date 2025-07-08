@@ -19,24 +19,10 @@ class TextData {
     "años",
   ];
 
-  static const List<String> completedState = ["Completado", "Pendiente"];
-
-  static const List<String> completedStatev2 = [
-    "Completado",
-    "En curso",
-    "Pendiente",
-  ];
-
-  static const List<String> statusOptions = [
-    'completado',
-    'en_curso',
-    'pendiente',
-  ];
-
-  static const Map<String, String> statusLabels = {
-    'completado': 'Completado',
-    'en_curso': 'En curso',
-    'pendiente': 'Pendiente',
+  static const Map<String, String> statusOptions = {
+    'completado': "Completado",
+    'en_curso': "En curso",
+    'pendiente': "Pendiente",
   };
 
   static const String newReminderButton = "Nuevo Recordatorio";
@@ -61,13 +47,22 @@ class TextData {
 
   static String loginTitle = "¿Quién está usando IW Reminder?";
 
-  static String getCompletedLabel(bool isCompleted, {String? stateVersion}) {
+  static String getCompletedLabel(
+    String? status,
+    String? stateVersion,
+    bool? isCompleted,
+  ) {
     final version = stateVersion ?? 'v1';
-
-    if (version == 'v2') {
-      return isCompleted ? completedStatev2[0] : completedStatev2[1];
+    if (version == 'v2' && status != null) {
+      return statusOptions[status]!;
     } else {
-      return isCompleted ? completedState[0] : completedState[1];
+      if (isCompleted != null) {
+        return isCompleted
+            ? statusOptions['completado']!
+            : statusOptions['pendiente']!;
+      } else {
+        return statusOptions['pendiente']!;
+      }
     }
   }
 
@@ -81,7 +76,7 @@ class TextData {
 class ConstantData {
   static DateFormat dateFormat = DateFormat('dd/MM/yyyy\nhh:mm');
   static DateFormat onlyDateFormat = DateFormat('dd/MM/yyyy');
-  
+
   //static const String reminderCollection = "reminders";
   static const String reminderCollection = "reminders_dev";
   static const String reminderId = "id";
