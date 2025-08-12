@@ -13,6 +13,7 @@ class NotificationProvider with ChangeNotifier {
   );
 
   UserModel? currentUser;
+  //bool isVersion2 = true;
 
   List<UserModel> users = [];
   String? editingReminderId;
@@ -26,6 +27,11 @@ class NotificationProvider with ChangeNotifier {
   List<UserModel> selectedReceiversMainList = [];
 
   String? priority;
+
+  // void changeRemindersVersion(bool value) {
+  //   isVersion2 = value;
+  //   notifyListeners();
+  // }
 
   void setPriority(String selectedPriority) {
     priority = selectedPriority;
@@ -117,7 +123,8 @@ class NotificationProvider with ChangeNotifier {
         priority: priority!,
         content: contenidoCtrl.text.trim(),
         senderId: selectedSender!.id,
-        receiverId: selectedReceiver?.id,
+        //receiverId: selectedReceiver?.id,
+        receiverId: selectedReceivers.first.id, //NEW
         receiversIds: selectedReceivers.map((u) => u.id).toList(),
         completed: false,
         stateVersion: 'v2',

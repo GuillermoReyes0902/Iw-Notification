@@ -99,6 +99,24 @@ class NotificationListScreen extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      // Consumer<NotificationProvider>(
+                      //   builder: (context, controller, _) {
+                      //     return Row(
+                      //       mainAxisAlignment: MainAxisAlignment.end,
+                      //       children: [
+                      //         Text(
+                      //           "Recordatorios v${controller.isVersion2 ? "2" : "1"} ",
+                      //           style: TextStyle(color: Colors.grey),
+                      //         ),
+                      //         Switch(
+                      //           value: controller.isVersion2,
+                      //           onChanged: (bool val) =>
+                      //               controller.changeRemindersVersion(val),
+                      //         ),
+                      //       ],
+                      //     );
+                      //   },
+                      // ),
                       Row(
                         children: const [
                           Icon(Icons.message_outlined, size: 20),
@@ -118,10 +136,8 @@ class NotificationListScreen extends StatelessWidget {
                       UsersDropDown(origin: DropDownOrigin.mainlist),
 
                       const SizedBox(height: 16),
-                      Selector<NotificationProvider, UserModel?>(
-                        selector: (_, controller) =>
-                            controller.selectedReceiverMainList,
-                        builder: (_, selectedReceiverMainList, _) {
+                      Consumer<NotificationProvider>(
+                        builder: (context, controller, _) {
                           return StreamBuilder<QuerySnapshot>(
                             stream: FirebaseFirestore.instance
                                 .collection(ConstantData.reminderCollection)
@@ -148,27 +164,39 @@ class NotificationListScreen extends StatelessWidget {
                                 );
                               }
 
-                              final allReminders = docs.map((doc) {
+                              var allReminders = docs.map((doc) {
                                 final data = doc.data() as Map<String, dynamic>;
                                 return ReminderModel.fromJson({
                                   ConstantData.reminderId: doc.id,
                                   ...data,
                                 });
                               }).toList();
+                              // allReminders = allReminders
+                              //     .where(
+                              //       (rem) => controller.isVersion2
+                              //           ? rem.stateVersion == "v2"
+                              //           : true,
+                              //     )
+                              //     .toList();
 
                               allReminders.sort(
                                 (a, b) => b.date.compareTo(a.date),
                               );
 
-                              final reminders = selectedReceiverMainList == null
+                              final reminders =
+                                  controller.selectedReceiverMainList == null
                                   ? allReminders
                                   : allReminders.where((r) {
                                       final matchSingle =
                                           r.receiverId ==
-                                          selectedReceiverMainList.id;
+                                          controller
+                                              .selectedReceiverMainList!
+                                              .id;
                                       final matchMultiple =
                                           r.receiversIds?.contains(
-                                            selectedReceiverMainList.id,
+                                            controller
+                                                .selectedReceiverMainList!
+                                                .id,
                                           ) ??
                                           false;
                                       return matchSingle || matchMultiple;
