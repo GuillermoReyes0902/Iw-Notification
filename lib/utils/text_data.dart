@@ -77,8 +77,8 @@ class ConstantData {
   static DateFormat dateFormat = DateFormat('dd/MM/yyyy\nhh:mm');
   static DateFormat onlyDateFormat = DateFormat('dd/MM/yyyy');
 
-  //static const String reminderCollection = "reminders";
-  static const String reminderCollection = "reminders_dev";
+  static const String reminderCollection = "reminders";
+  //static const String reminderCollection = "reminders_dev";
   static const String reminderId = "id";
   static const String reminderDate = "date";
   static const String reminderDeadline = "deadline";
