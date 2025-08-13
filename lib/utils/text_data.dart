@@ -15,8 +15,8 @@ class TextData {
     "Ayer",
     "Hace ",
     " días",
-    "meses",
-    "años",
+    " meses",
+    " años",
   ];
 
   static const Map<String, String> statusOptions = {
