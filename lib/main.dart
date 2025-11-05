@@ -1,8 +1,9 @@
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
-//import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:iwproject/domain/models/project_model.dart';
 import 'package:iwproject/domain/models/user_model.dart';
 import 'package:iwproject/firebase_options.dart';
 import 'package:iwproject/presentation/pages/notification_list_screen.dart';
@@ -19,15 +20,14 @@ void main() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   if (Platform.isMacOS) {
-    //
-    // FirebaseMessaging firebaseMessaging = FirebaseMessaging.instance;
-    // var token = await firebaseMessaging.getToken();
-    // print(token);
-    // FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-    //   print('[onMessage] message: $message');
-    // });
-    // FirebaseMessaging.onBackgroundMessage(onBackgroundMessage);
-    //
+    FirebaseMessaging firebaseMessaging = FirebaseMessaging.instance;
+    var token = await firebaseMessaging.getToken();
+    print(token);
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      print('[onMessage] message: $message');
+    });
+    FirebaseMessaging.onBackgroundMessage(onBackgroundMessage);
+
     _launchAtStartupInit();
   }
 
@@ -42,10 +42,10 @@ void main() async {
   );
 }
 
-// Future<void> onBackgroundMessage(RemoteMessage message) {
-//   print('[onBackgroundMessage] message: $message');
-//   return Future.value();
-// }
+Future<void> onBackgroundMessage(RemoteMessage message) {
+  print('[onBackgroundMessage] message: $message');
+  return Future.value();
+}
 
 _launchAtStartupInit() async {
   launchAtStartup.setup(
@@ -67,6 +67,7 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   @override
   void initState() {
+    //Cargar usuarios desde Firestore
     final users = FirebaseFirestore.instance.collection(
       ConstantData.userCollection,
     );
@@ -80,6 +81,20 @@ class _MyAppState extends State<MyApp> {
       controller.setUsers(users);
       controller.getUser();
     });
+
+    //Cargar proyectos desde Firestore
+    final projects = FirebaseFirestore.instance.collection(
+      ConstantData.projectCollection,
+    );
+
+    projects.get().then((querySnapshot) {
+      final projects = querySnapshot.docs.map((doc) {
+        final data = doc.data();
+        return ProjectModel.fromJson({ConstantData.projectId: doc.id, ...data});
+      }).toList();
+      controller.setProjects(projects);
+    });
+
     super.initState();
   }
 

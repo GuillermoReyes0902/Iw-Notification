@@ -9,6 +9,15 @@ class TextData {
   static const String all = "Todos";
   static const String sender = "De: ";
   static const String receiver = "Para: ";
+  static const String project = "Proyecto: ";
+  static const String addProjectOption = "Agregar nuevo proyecto";
+  static const String newProjectDialogTitle = "Nuevo proyecto";
+  static const String newProjectFieldHint = "Nombre del proyecto";
+  static const String newProjectValidator = "Nombre del proyecto vacío";
+  static const String newProjectCreated = "Proyecto creado";
+  static const String newProjectError = "No se pudo crear el proyecto";
+  static const String dialogCancel = "Cancelar";
+  static const String dialogSave = "Guardar";
 
   static const List<String> timeAgo = [
     "Hoy",
@@ -35,6 +44,7 @@ class TextData {
   static const String senderValidator = "Remitente vacío";
   static const String selectReciver = "Seleccionar destinatario";
   static const String receiverValidator = "Destinatario vacío";
+  static const String projectValidator = "Proyecto vacío";
   static const String priorityValidator = "Prioridad vacía";
   static const String deadline = "Fecha límite  ";
   static const String priority = "  Prioridad  ";
@@ -76,22 +86,33 @@ class TextData {
 class ConstantData {
   static DateFormat dateFormat = DateFormat('dd/MM/yyyy\nhh:mm');
   static DateFormat onlyDateFormat = DateFormat('dd/MM/yyyy');
+  static const String defaultUserImage =
+      'https://www.shutterstock.com/image-vector/blank-avatar-photo-place-holder-600nw-1095249842.jpg';
 
-  static const String reminderCollection = "reminders";
-  //static const String reminderCollection = "reminders_dev";
+  //COLECCIONES
+  //static const String reminderCollection = "reminders";
+  static const String reminderCollection = "reminders_dev";
+  static const String userCollection = "users";
+  static const String projectCollection = "projects";
+
+  //ATRIBUTOS REMINDER
   static const String reminderId = "id";
   static const String reminderDate = "date";
   static const String reminderDeadline = "deadline";
   static const String reminderPriority = "priority";
   static const String reminderContent = "content";
   static const String reminderSenderId = "senderId";
+  static const String reminderProjectId = "projectId";
   static const String reminderReceiverId = "receiverId";
   static const String reminderReceiversIds = "receiversIds";
   static const String reminderCompleted = "completed";
-  static const String userCollection = "users";
+
+  //ATRIBUTOS USER
   static const String userId = "id";
   static const String userName = "name";
   static const String userPhoto = "photo";
-  static const String defaultUserImage =
-      'https://www.shutterstock.com/image-vector/blank-avatar-photo-place-holder-600nw-1095249842.jpg';
+
+  //ATRIBUTOS PROYECTO
+  static const String projectId = "id";
+  static const String projectName = "name";
 }
