@@ -1,4 +1,4 @@
-import 'package:iwproject/utils/text_data.dart';
+import 'package:iwproject/utils/data.dart';
 
 class UserModel {
   String id;

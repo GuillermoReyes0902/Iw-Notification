@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:iwproject/presentation/widgets/projects_dropdown.dart';
+import 'package:iwproject/utils/data.dart';
 import 'package:provider/provider.dart';
 import 'package:iwproject/domain/models/reminder_model.dart';
 import 'package:iwproject/presentation/providers/notification_provider.dart';
@@ -115,9 +116,7 @@ class MessageSenderScreen extends StatelessWidget {
                                     style: TextStyle(color: Colors.grey),
                                   ),
                                   const SizedBox(height: 8),
-                                  const UsersDropDown(
-                                    origin: DropDownOrigin.receiver,
-                                  ),
+                                  const UsersDropDownSelect(),
                                   const SizedBox(height: 16),
                                   const Text(
                                     TextData.project,

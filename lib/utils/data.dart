@@ -1,3 +1,6 @@
+import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+
 /// Clase que centraliza valores constantes y utilidades comunes de la aplicación.
 ///
 /// Contiene:
@@ -59,7 +62,55 @@ class ConstantData {
 
   // ---------------- LINKS ----------------
 
-  // ---------------- ENUM MAP ----------------
-
   // ---------------- MÉTODOS ----------------
+  static DateFormat dateFormat = DateFormat('dd/MM/yyyy\nhh:mm');
+  static DateFormat onlyDateFormat = DateFormat('dd/MM/yyyy');
+  static DateFormat dateGridFormat = DateFormat('dd/MM');
+  static const String defaultUserImage =
+      'https://www.shutterstock.com/image-vector/blank-avatar-photo-place-holder-600nw-1095249842.jpg';
+
+  //COLECCIONES
+  //static const String reminderCollection = "reminders";
+  static const String reminderCollection = "reminders_dev";
+  static const String userCollection = "users";
+  static const String projectCollection = "projects";
+
+  //ATRIBUTOS REMINDER
+  static const String reminderId = "id";
+  static const String reminderDate = "date";
+  static const String reminderDeadline = "deadline";
+  static const String reminderPriority = "priority";
+  static const String reminderContent = "content";
+  static const String reminderSenderId = "senderId";
+  static const String reminderProjectId = "projectId";
+  static const String reminderStatus = "status";
+  static const String reminderReceiverId = "receiverId";
+  static const String reminderReceiversIds = "receiversIds";
+  static const String reminderCompleted = "completed";
+
+  //ATRIBUTOS USER
+  static const String userId = "id";
+  static const String userName = "name";
+  static const String userPhoto = "photo";
+
+  //ATRIBUTOS PROYECTO
+  static const String projectId = "id";
+  static const String projectName = "name";
+
+  static const String addProjectId = '__add_project__';
+  static const String allProjectsId = '__all_projects__';
+
+  static Color getStatusColor(String status) {
+    switch (status) {
+      case 'completado':
+        return Colors.green;
+      case 'en_curso':
+        return Colors.orange;
+      case 'pendiente':
+      default:
+        return Colors.red;
+    }
+  }
 }
+
+// ---------------- ENUM ----------------

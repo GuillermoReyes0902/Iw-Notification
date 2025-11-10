@@ -10,6 +10,8 @@ class MainFlutterWindow: NSWindow {
     let windowFrame = self.frame
     self.contentViewController = flutterViewController
     self.setFrame(windowFrame, display: true)
+    // Prevent resizing below a comfortable layout baseline.
+    self.minSize = NSSize(width: 1000, height: 640)
 
         // Add FlutterMethodChannel platform code
     FlutterMethodChannel(

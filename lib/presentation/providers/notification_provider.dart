@@ -7,10 +7,10 @@ import 'package:iwproject/domain/models/project_model.dart';
 import 'package:iwproject/domain/models/reminder_model.dart';
 //import 'package:iwproject/domain/models/request/access_request.dart';
 import 'package:iwproject/domain/models/user_model.dart';
+import 'package:iwproject/utils/data.dart';
 // import 'package:iwproject/utils/endpoints.dart';
 // import 'package:iwproject/utils/network_handler.dart';
 import 'package:iwproject/utils/shared_preferences_handler.dart';
-import 'package:iwproject/utils/text_data.dart';
 
 class NotificationProvider with ChangeNotifier {
   final formKey = GlobalKey<FormState>();
@@ -26,21 +26,15 @@ class NotificationProvider with ChangeNotifier {
   List<ProjectModel> projects = [];
   String? editingReminderId;
   bool isLoading = false;
-
-  UserModel? selectedSender;
-  UserModel? selectedReceiver;
-  ProjectModel? selectedProject;
-  UserModel? selectedReceiverMainList;
-
-  List<UserModel> selectedReceivers = [];
-  List<UserModel> selectedReceiversMainList = [];
-
   String? priority;
 
-  // void changeRemindersVersion(bool value) {
-  //   isVersion2 = value;
-  //   notifyListeners();
-  // }
+  //dropdowns proyecto
+  ProjectModel? selectedProject;
+  ProjectModel? selectedProjectMainList;
+
+  ///dropdowns receptor
+  UserModel? selectedReceiverMainList;
+  List<UserModel> selectedReceivers = [];
 
   void setPriority(String selectedPriority) {
     priority = selectedPriority;
@@ -55,7 +49,6 @@ class NotificationProvider with ChangeNotifier {
   Future<void> logIn(UserModel selectedUser) async {
     await SharedPreferencesHandler.setUser(selectedUser);
     currentUser = selectedUser;
-    selectedSender = selectedUser;
     if (Platform.isMacOS) {
       FirebaseMessaging firebaseMessaging = FirebaseMessaging.instance;
       var token = await firebaseMessaging.getToken();
@@ -77,7 +70,6 @@ class NotificationProvider with ChangeNotifier {
   Future<void> logOut() async {
     await SharedPreferencesHandler.deleteUser();
     currentUser = null;
-    selectedSender = null;
     notifyListeners();
   }
 
@@ -85,7 +77,6 @@ class NotificationProvider with ChangeNotifier {
     final user = await SharedPreferencesHandler.getUser();
     if (user != null) {
       currentUser = user;
-      selectedSender = user;
       notifyListeners();
       return true;
     }
@@ -122,13 +113,13 @@ class NotificationProvider with ChangeNotifier {
     }
   }
 
-  void setReceiver(UserModel? user) {
-    selectedReceiver = user;
+  void setProject(ProjectModel? project) {
+    selectedProject = project;
     notifyListeners();
   }
 
-  void setProject(ProjectModel? project) {
-    selectedProject = project;
+  void setMainListProject(ProjectModel? project) {
+    selectedProjectMainList = project;
     notifyListeners();
   }
 
@@ -139,11 +130,6 @@ class NotificationProvider with ChangeNotifier {
 
   void setReceivers(List<UserModel> userList) {
     selectedReceivers = userList;
-    notifyListeners();
-  }
-
-  void setMainListReceivers(List<UserModel> userList) {
-    selectedReceiversMainList = userList;
     notifyListeners();
   }
 
@@ -176,13 +162,12 @@ class NotificationProvider with ChangeNotifier {
         deadline: ConstantData.onlyDateFormat.parse(deadlineCtrl.text),
         priority: priority!,
         content: contenidoCtrl.text.trim(),
-        senderId: selectedSender!.id,
-        projectId: selectedProject?.id,
-        //receiverId: selectedReceiver?.id,
+        senderId: currentUser!.id,
+        projectId: selectedProject!.id,
         receiverId: selectedReceivers.first.id, //NEW
         receiversIds: selectedReceivers.map((u) => u.id).toList(),
         completed: false,
-        stateVersion: 'v2',
+        status: 'pendiente',
       ).toJson();
 
       if (editingReminderId != null) {
@@ -208,43 +193,21 @@ class NotificationProvider with ChangeNotifier {
     contenidoCtrl.text = reminder.content;
     deadlineCtrl.text = ConstantData.onlyDateFormat.format(reminder.deadline);
     priority = reminder.priority;
-
-    try {
-      selectedSender = users.firstWhere((u) => u.id == reminder.senderId);
-
-      if (reminder.receiverId != null) {
-        selectedReceiver = users.firstWhere(
-          (u) => u.id == reminder.receiverId,
-          orElse: () => users.first,
-        );
-      }
-
-      final receivers = users
-          .where((u) => reminder.receiversIds?.contains(u.id) ?? false)
-          .toList();
-      selectedReceivers = receivers;
-
-      if (receivers.isNotEmpty) {
-        selectedReceiversMainList = receivers;
-      } else if (reminder.receiverId != null) {
-        final fallbackUser = users.firstWhere(
-          (u) => u.id == reminder.receiverId,
-          orElse: () => users.first,
-        );
-        selectedReceiversMainList = [fallbackUser];
-      }
-    } catch (e) {
-      debugPrint("Error al encontrar usuarios para edición: $e");
-    }
+    selectedProject = projects.firstWhere((p) => p.id == reminder.projectId);
+    selectedReceivers = users
+        .where((u) => reminder.receiversIds.contains(u.id))
+        .toList();
 
     notifyListeners();
   }
 
   void clearForm() {
     contenidoCtrl.clear();
-    selectedReceiver = null;
     selectedReceivers = [];
+    selectedReceiverMainList = null;
     selectedProject = null;
+    selectedProjectMainList = null;
+
     editingReminderId = null;
     deadlineCtrl.text = ConstantData.onlyDateFormat.format(DateTime.now());
     priority = null;
@@ -274,7 +237,7 @@ class NotificationProvider with ChangeNotifier {
 
     return allReminders.where((r) {
       final matchSingle = r.receiverId == user.id;
-      final matchMultiple = r.receiversIds?.contains(user.id) ?? false;
+      final matchMultiple = r.receiversIds.contains(user.id);
       return matchSingle || matchMultiple;
     }).toList();
   }

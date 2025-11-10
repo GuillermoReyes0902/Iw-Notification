@@ -2,6 +2,8 @@ import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:iwproject/domain/models/project_model.dart';
 import 'package:iwproject/presentation/providers/notification_provider.dart';
+import 'package:iwproject/utils/data.dart';
+
 import 'package:iwproject/utils/text_data.dart';
 import 'package:provider/provider.dart';
 
@@ -13,20 +15,26 @@ class ProjectsDropdown extends StatefulWidget {
 }
 
 class _ProjectsDropdownState extends State<ProjectsDropdown> {
-  static const String _addProjectId = '__add_project__';
   final _dropdownKey = GlobalKey<DropdownSearchState<ProjectModel>>();
 
   @override
   Widget build(BuildContext context) {
     return Consumer<NotificationProvider>(
       builder: (context, controller, _) {
-        final items = [
+        // --- Construimos la lista dependiendo del origen ---
+        List<ProjectModel> items = [];
+
+        items = [
           ...controller.projects,
-          ProjectModel(id: _addProjectId, name: TextData.addProjectOption),
+          ProjectModel(
+            id: ConstantData.addProjectId,
+            name: TextData.addProjectOption,
+          ), // "Añadir proyecto"
         ];
 
         return DropdownSearch<ProjectModel>(
           key: _dropdownKey,
+
           items: items,
           selectedItem: controller.selectedProject,
           itemAsString: (project) => project.name,
@@ -38,15 +46,19 @@ class _ProjectsDropdownState extends State<ProjectsDropdown> {
             constraints: const BoxConstraints(maxHeight: 320),
             menuProps: const MenuProps(),
             itemBuilder: (context, item, isSelected) {
-              final isAddItem = item.id == _addProjectId;
+              final isAddItem = item.id == ConstantData.addProjectId;
+              final isAllItem = item.id == ConstantData.allProjectsId;
+
               return ListTile(
                 visualDensity: VisualDensity.compact,
                 leading: isAddItem
                     ? const Icon(Icons.add, color: Colors.grey)
+                    : isAllItem
+                    ? const Icon(Icons.apps, color: Colors.blueGrey)
                     : null,
                 title: Text(
                   item.name,
-                  style: isAddItem
+                  style: isAddItem || isAllItem
                       ? const TextStyle(
                           fontWeight: FontWeight.w600,
                           color: Colors.grey,
@@ -71,7 +83,8 @@ class _ProjectsDropdownState extends State<ProjectsDropdown> {
               value == null ? TextData.projectValidator : null,
           onChanged: (project) async {
             if (project == null) return;
-            if (project.id == _addProjectId) {
+            if (project.id == ConstantData.addProjectId) {
+              // Caso: añadir nuevo proyecto
               _dropdownKey.currentState?.changeSelectedItem(
                 controller.selectedProject,
               );
@@ -106,9 +119,7 @@ class _ProjectsDropdownState extends State<ProjectsDropdown> {
 
 class _AddProjectDialog extends StatefulWidget {
   final NotificationProvider controller;
-
   const _AddProjectDialog({required this.controller});
-
   @override
   State<_AddProjectDialog> createState() => _AddProjectDialogState();
 }
@@ -118,7 +129,6 @@ class _AddProjectDialogState extends State<_AddProjectDialog> {
   late final TextEditingController _nameController;
   bool _isSaving = false;
   String? _errorMessage;
-
   @override
   void initState() {
     super.initState();
@@ -134,13 +144,11 @@ class _AddProjectDialogState extends State<_AddProjectDialog> {
   Future<void> _submit() async {
     if (_isSaving) return;
     if (!(_formKey.currentState?.validate() ?? false)) return;
-
     FocusScope.of(context).unfocus();
     setState(() {
       _isSaving = true;
       _errorMessage = null;
     });
-
     ProjectModel? newProject;
     try {
       newProject = await widget.controller.addProject(
@@ -149,7 +157,6 @@ class _AddProjectDialogState extends State<_AddProjectDialog> {
     } catch (_) {
       newProject = null;
     }
-
     if (!mounted) return;
     if (newProject != null) {
       Navigator.of(context).pop(true);
@@ -207,6 +214,69 @@ class _AddProjectDialogState extends State<_AddProjectDialog> {
               : const Text(TextData.dialogSave),
         ),
       ],
+    );
+  }
+}
+
+class BasicProjectDropdown extends StatelessWidget {
+  const BasicProjectDropdown({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<NotificationProvider>(
+      builder: (context, controller, _) {
+        final List<DropdownMenuItem<ProjectModel>> items = [];
+        items.add(
+          DropdownMenuItem<ProjectModel>(
+            value: null,
+            child: Row(
+              children: [
+                Icon(Icons.apps, size: 14, color: Colors.grey[400]!),
+                SizedBox(width: 6),
+                Text(
+                  TextData.all,
+                  style: TextStyle(color: Colors.grey[400]!, fontSize: 12),
+                ),
+              ],
+            ),
+          ),
+        );
+
+        items.addAll(
+          controller.projects.map(
+            (project) => DropdownMenuItem<ProjectModel>(
+              value: project,
+              child: Text(project.name, style: TextStyle(fontSize: 12)),
+            ),
+          ),
+        );
+
+        return SizedBox(
+          height: 45,
+          child: DropdownButtonFormField<ProjectModel>(
+            iconEnabledColor: Colors.grey[400]!,
+            value: controller.selectedProject,
+            decoration: InputDecoration(
+              // Definimos el mismo borde gris para todos los estados
+              enabledBorder: OutlineInputBorder(
+                borderSide: BorderSide(color: Colors.grey[400]!, width: 1),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderSide: BorderSide(color: Colors.grey[400]!, width: 1),
+              ),
+              errorBorder: OutlineInputBorder(
+                borderSide: BorderSide(color: Colors.grey[400]!, width: 1),
+              ),
+              focusedErrorBorder: OutlineInputBorder(
+                borderSide: BorderSide(color: Colors.grey[400]!, width: 1),
+              ),
+            ),
+            items: items,
+            onChanged: (value) => controller.setMainListProject(value),
+            validator: (value) => null,
+          ),
+        );
+      },
     );
   }
 }

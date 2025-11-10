@@ -4,8 +4,12 @@ import 'package:iwproject/domain/models/reminder_model.dart';
 import 'package:iwproject/domain/models/user_model.dart';
 import 'package:iwproject/presentation/pages/message_sender_screen.dart';
 import 'package:iwproject/presentation/providers/notification_provider.dart';
-import 'package:iwproject/presentation/widgets/reminder_item.dart';
+import 'package:iwproject/presentation/widgets/projects_dropdown.dart';
+//import 'package:iwproject/presentation/widgets/reminder_item.dart';
+import 'package:iwproject/presentation/widgets/reminder_item_grid.dart';
 import 'package:iwproject/presentation/widgets/users_dropdown.dart';
+import 'package:iwproject/utils/data.dart';
+
 import 'package:provider/provider.dart';
 import 'package:iwproject/utils/text_data.dart';
 //import 'package:iwproject/presentation/providers/reminder_listener_provider.dart';
@@ -38,33 +42,16 @@ class NotificationListScreen extends StatelessWidget {
     // listener.startListening(context, controllerNotification.currentUser!.id);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF9FAFB),
+      backgroundColor: Colors.grey[100],
       floatingActionButton: FloatingActionButton.extended(
         onPressed: newReminderButton,
         label: Text(TextData.newReminderButton),
       ),
       appBar: AppBar(
-        title: Selector<NotificationProvider, UserModel?>(
-          selector: (_, controller) => controller.currentUser,
-          builder: (_, currentUser, _) {
-            return Row(
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.all(Radius.circular(35)),
-                  child: Image.asset(currentUser!.photo, height: 35, width: 35),
-                ),
-                SizedBox(width: 12),
-                Text(
-                  "Bienvenido/a ${currentUser.name}",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-              ],
-            );
-          },
-        ),
-
         centerTitle: false,
         backgroundColor: Colors.transparent,
+        scrolledUnderElevation: 0,
+        shadowColor: Colors.transparent,
         elevation: 0,
         automaticallyImplyLeading: false,
         actions: [
@@ -84,141 +71,182 @@ class NotificationListScreen extends StatelessWidget {
         ],
       ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 800),
-              child: Card(
-                elevation: 2,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Consumer<NotificationProvider>(
-                      //   builder: (context, controller, _) {
-                      //     return Row(
-                      //       mainAxisAlignment: MainAxisAlignment.end,
-                      //       children: [
-                      //         Text(
-                      //           "Recordatorios v${controller.isVersion2 ? "2" : "1"} ",
-                      //           style: TextStyle(color: Colors.grey),
-                      //         ),
-                      //         Switch(
-                      //           value: controller.isVersion2,
-                      //           onChanged: (bool val) =>
-                      //               controller.changeRemindersVersion(val),
-                      //         ),
-                      //       ],
-                      //     );
-                      //   },
-                      // ),
-                      Row(
-                        children: const [
-                          Icon(Icons.message_outlined, size: 20),
-                          SizedBox(width: 8),
-                          Text(
-                            TextData.messageListTitle,
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 950),
+            child: Padding(
+              padding: const EdgeInsets.only(
+                left: 24,
+                right: 24,
+                bottom: 24,
+                top: 8,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  /// Dropdown para filtrar
+                  SizedBox(
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            Selector<NotificationProvider, UserModel?>(
+                              selector: (_, controller) =>
+                                  controller.currentUser,
+                              builder: (_, currentUser, _) {
+                                return Row(
+                                  children: [
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.all(
+                                        Radius.circular(50),
+                                      ),
+                                      child: Image.asset(
+                                        currentUser!.photo,
+                                        height: 50,
+                                        width: 50,
+                                      ),
+                                    ),
+                                    SizedBox(width: 12),
+                                    Text(
+                                      "Bienvenido/a ${currentUser.name}",
+                                      style: TextStyle(
+                                        fontSize: 25,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              },
                             ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
+                          ],
+                        ),
 
-                      /// Dropdown para filtrar
-                      UsersDropDown(origin: DropDownOrigin.mainlist),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Row(
+                              children: [
+                                Text(
+                                  "Colaborador: ",
+                                  style: TextStyle(
+                                    color: Colors.grey[400]!,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                                SizedBox(
+                                  width: 300,
+                                  child: BasicUsersDropDown(),
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: 8),
+                            Row(
+                              children: [
+                                Text(
+                                  "Proyecto: ",
+                                  style: TextStyle(
+                                    color: Colors.grey[400]!,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                                SizedBox(
+                                  width: 300,
+                                  child: BasicProjectDropdown(),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
 
-                      const SizedBox(height: 16),
-                      Consumer<NotificationProvider>(
-                        builder: (context, controller, _) {
-                          return StreamBuilder<QuerySnapshot>(
-                            stream: FirebaseFirestore.instance
-                                .collection(ConstantData.reminderCollection)
-                                .snapshots(),
-                            builder: (context, snapshot) {
-                              if (snapshot.hasError) {
-                                return Text('Error: ${snapshot.error}');
-                              }
+                  const SizedBox(height: 8),
+                  Consumer<NotificationProvider>(
+                    builder: (context, controller, _) {
+                      return StreamBuilder<QuerySnapshot>(
+                        stream: FirebaseFirestore.instance
+                            .collection(ConstantData.reminderCollection)
+                            .snapshots(),
+                        builder: (context, snapshot) {
+                          final docs = snapshot.data?.docs ?? [];
 
-                              if (snapshot.connectionState ==
-                                  ConnectionState.waiting) {
-                                return const Padding(
-                                  padding: EdgeInsets.symmetric(vertical: 20),
-                                  child: CircularProgressIndicator(),
-                                );
-                              }
+                          if (docs.isEmpty) {
+                            return const Text(
+                              TextData.empptyReminders,
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.grey,
+                              ),
+                            );
+                          }
 
-                              final docs = snapshot.data?.docs ?? [];
+                          var allReminders = docs.map((doc) {
+                            final data = doc.data() as Map<String, dynamic>;
+                            return ReminderModel.fromJson({
+                              ConstantData.reminderId: doc.id,
+                              ...data,
+                            });
+                          }).toList();
 
-                              if (docs.isEmpty) {
-                                return const Text(
-                                  TextData.empptyReminders,
-                                  style: TextStyle(color: Colors.grey),
-                                );
-                              }
+                          // Ordenamos por fecha
+                          allReminders.sort((a, b) => b.date.compareTo(a.date));
 
-                              var allReminders = docs.map((doc) {
-                                final data = doc.data() as Map<String, dynamic>;
-                                return ReminderModel.fromJson({
-                                  ConstantData.reminderId: doc.id,
-                                  ...data,
-                                });
-                              }).toList();
-                              // allReminders = allReminders
-                              //     .where(
-                              //       (rem) => controller.isVersion2
-                              //           ? rem.stateVersion == "v2"
-                              //           : true,
-                              //     )
-                              //     .toList();
+                          // Aplicamos ambos filtros
+                          final selectedUser =
+                              controller.selectedReceiverMainList;
+                          final selectedProject =
+                              controller.selectedProjectMainList;
 
-                              allReminders.sort(
-                                (a, b) => b.date.compareTo(a.date),
-                              );
+                          final reminders = allReminders.where((r) {
+                            bool userMatch = true;
+                            bool projectMatch = true;
 
-                              final reminders =
-                                  controller.selectedReceiverMainList == null
-                                  ? allReminders
-                                  : allReminders.where((r) {
-                                      final matchSingle =
-                                          r.receiverId ==
-                                          controller
-                                              .selectedReceiverMainList!
-                                              .id;
-                                      final matchMultiple =
-                                          r.receiversIds?.contains(
-                                            controller
-                                                .selectedReceiverMainList!
-                                                .id,
-                                          ) ??
-                                          false;
-                                      return matchSingle || matchMultiple;
-                                    }).toList();
+                            if (selectedUser != null) {
+                              userMatch =
+                                  r.receiverId == selectedUser.id ||
+                                  (r.receiversIds.contains(selectedUser.id));
+                            }
 
-                              return Column(
+                            if (selectedProject != null) {
+                              projectMatch = r.projectId == selectedProject.id;
+                            }
+
+                            return userMatch && projectMatch;
+                          }).toList();
+
+                          return Expanded(
+                            child: SingleChildScrollView(
+                              child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
                                     "${TextData.messageListSubtitle[0]}${reminders.length}${TextData.messageListSubtitle[1]}",
-                                    style: const TextStyle(color: Colors.grey),
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w600,
+                                    ),
                                   ),
                                   const SizedBox(height: 8),
-                                  ListView.builder(
+                                  GridView.builder(
                                     physics:
                                         const NeverScrollableScrollPhysics(),
                                     padding: EdgeInsets.zero,
                                     shrinkWrap: true,
+                                    gridDelegate:
+                                        const SliverGridDelegateWithFixedCrossAxisCount(
+                                          crossAxisCount: 3,
+                                          mainAxisSpacing: 0,
+                                          crossAxisSpacing: 12,
+                                          childAspectRatio: 1,
+                                        ),
                                     itemCount: reminders.length,
                                     itemBuilder: (context, index) {
                                       final reminder = reminders[index];
-                                      return ReminderItem(
+                                      return ReminderItemGrid(
                                         reminder: reminder,
                                         isLastReminder:
                                             index < reminders.length - 1,
@@ -226,14 +254,14 @@ class NotificationListScreen extends StatelessWidget {
                                     },
                                   ),
                                 ],
-                              );
-                            },
+                              ),
+                            ),
                           );
                         },
-                      ),
-                    ],
+                      );
+                    },
                   ),
-                ),
+                ],
               ),
             ),
           ),

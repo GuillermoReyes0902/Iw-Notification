@@ -1,4 +1,3 @@
-import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 
 class TextData {
@@ -57,62 +56,9 @@ class TextData {
 
   static String loginTitle = "¿Quién está usando IW Reminder?";
 
-  static String getCompletedLabel(
-    String? status,
-    String? stateVersion,
-    bool? isCompleted,
-  ) {
-    final version = stateVersion ?? 'v1';
-    if (version == 'v2' && status != null) {
-      return statusOptions[status]!;
-    } else {
-      if (isCompleted != null) {
-        return isCompleted
-            ? statusOptions['completado']!
-            : statusOptions['pendiente']!;
-      } else {
-        return statusOptions['pendiente']!;
-      }
-    }
-  }
-
   static const Map<String, Color> priorityColors = {
     "Baja": Colors.green,
     "Intermedia": Colors.orange,
     "Alta": Colors.red,
   };
-}
-
-class ConstantData {
-  static DateFormat dateFormat = DateFormat('dd/MM/yyyy\nhh:mm');
-  static DateFormat onlyDateFormat = DateFormat('dd/MM/yyyy');
-  static const String defaultUserImage =
-      'https://www.shutterstock.com/image-vector/blank-avatar-photo-place-holder-600nw-1095249842.jpg';
-
-  //COLECCIONES
-  //static const String reminderCollection = "reminders";
-  static const String reminderCollection = "reminders_dev";
-  static const String userCollection = "users";
-  static const String projectCollection = "projects";
-
-  //ATRIBUTOS REMINDER
-  static const String reminderId = "id";
-  static const String reminderDate = "date";
-  static const String reminderDeadline = "deadline";
-  static const String reminderPriority = "priority";
-  static const String reminderContent = "content";
-  static const String reminderSenderId = "senderId";
-  static const String reminderProjectId = "projectId";
-  static const String reminderReceiverId = "receiverId";
-  static const String reminderReceiversIds = "receiversIds";
-  static const String reminderCompleted = "completed";
-
-  //ATRIBUTOS USER
-  static const String userId = "id";
-  static const String userName = "name";
-  static const String userPhoto = "photo";
-
-  //ATRIBUTOS PROYECTO
-  static const String projectId = "id";
-  static const String projectName = "name";
 }
