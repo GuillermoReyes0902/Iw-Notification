@@ -5,17 +5,14 @@ import 'package:iwproject/presentation/providers/notification_provider.dart';
 import 'package:iwproject/utils/text_data.dart';
 import 'package:provider/provider.dart';
 
-enum DropDownOrigin { mainlist, receiver }
-
-class UsersDropDown extends StatefulWidget {
-  final DropDownOrigin origin;
-  const UsersDropDown({super.key, required this.origin});
+class UsersDropDownSelect extends StatefulWidget {
+  const UsersDropDownSelect({super.key});
 
   @override
-  State<UsersDropDown> createState() => _UsersDropDownState();
+  State<UsersDropDownSelect> createState() => _UsersDropDownState();
 }
 
-class _UsersDropDownState extends State<UsersDropDown> {
+class _UsersDropDownState extends State<UsersDropDownSelect> {
   final _dropdownKey = GlobalKey<DropdownSearchState<UserModel>>();
   List<UserModel> _currentSelections = [];
   OverlayEntry? _overlayEntry;
@@ -30,21 +27,16 @@ class _UsersDropDownState extends State<UsersDropDown> {
   Widget build(BuildContext context) {
     return Consumer<NotificationProvider>(
       builder: (context, controller, _) {
-        final isMulti = widget.origin == DropDownOrigin.receiver;
-        final selectedUsers = isMulti
-            ? controller.selectedReceivers
-            : controller.selectedReceiversMainList;
-
         if (_currentSelections.isEmpty) {
-          _currentSelections = List.from(selectedUsers);
+          _currentSelections = List.from(controller.selectedReceivers);
         }
 
         return Listener(
-          onPointerDown: (_) => _saveSelections(controller),
+          onPointerDown: (_) => controller.setReceivers(_currentSelections),
           child: DropdownSearch<UserModel>.multiSelection(
             key: _dropdownKey,
             items: controller.users,
-            selectedItems: selectedUsers,
+            selectedItems: controller.selectedReceivers,
             itemAsString: (u) => u.name,
             compareFn: (a, b) => a.id == b.id,
             popupProps: PopupPropsMultiSelection.menu(
@@ -65,11 +57,10 @@ class _UsersDropDownState extends State<UsersDropDown> {
               setState(() {
                 _currentSelections = List.from(selected);
               });
-              _saveSelections(controller);
+              controller.setReceivers(_currentSelections);
             },
             validator: (value) {
-              if ((value == null || value.isEmpty) &&
-                  widget.origin == DropDownOrigin.receiver) {
+              if (value == null || value.isEmpty) {
                 return TextData.receiverValidator;
               }
               return null;
@@ -78,13 +69,5 @@ class _UsersDropDownState extends State<UsersDropDown> {
         );
       },
     );
-  }
-
-  void _saveSelections(NotificationProvider controller) {
-    if (widget.origin == DropDownOrigin.receiver) {
-      controller.setReceivers(_currentSelections);
-    } else {
-      controller.setMainListReceivers(_currentSelections);
-    }
   }
 }
