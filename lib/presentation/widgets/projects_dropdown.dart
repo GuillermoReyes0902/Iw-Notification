@@ -246,7 +246,15 @@ class BasicProjectDropdown extends StatelessWidget {
           controller.projects.map(
             (project) => DropdownMenuItem<ProjectModel>(
               value: project,
-              child: Text(project.name, style: TextStyle(fontSize: 12)),
+              child: SizedBox(
+                width: 250, // ajusta el ancho máximo del texto
+                child: Text(
+                  project.name,
+                  style: const TextStyle(fontSize: 12),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                ),
+              ),
             ),
           ),
         );

@@ -70,8 +70,8 @@ class ConstantData {
       'https://www.shutterstock.com/image-vector/blank-avatar-photo-place-holder-600nw-1095249842.jpg';
 
   //COLECCIONES
-  //static const String reminderCollection = "reminders";
-  static const String reminderCollection = "reminders_dev";
+  static const String reminderCollection = "reminders";
+  //static const String reminderCollection = "reminders_dev";
   static const String userCollection = "users";
   static const String projectCollection = "projects";
 

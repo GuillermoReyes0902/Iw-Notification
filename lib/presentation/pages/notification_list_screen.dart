@@ -192,8 +192,30 @@ class NotificationListScreen extends StatelessWidget {
                             });
                           }).toList();
 
-                          // Ordenamos por fecha
-                          allReminders.sort((a, b) => b.date.compareTo(a.date));
+                          // Ordenamos primero por prioridad y luego por fecha
+                          allReminders.sort((a, b) {
+                            // Definir el orden de prioridad
+                            const priorityOrder = {
+                              'alta': 3,
+                              'intermedia': 2,
+                              'baja': 1,
+                            };
+
+                            final priorityA =
+                                priorityOrder[a.priority.toLowerCase()] ?? 0;
+                            final priorityB =
+                                priorityOrder[b.priority.toLowerCase()] ?? 0;
+
+                            // Primero compara por prioridad
+                            if (priorityA != priorityB) {
+                              return priorityB.compareTo(
+                                priorityA,
+                              ); // mayor prioridad primero
+                            }
+
+                            // Si tienen la misma prioridad, ordena por fecha descendente
+                            return a.deadline.compareTo(b.deadline);
+                          });
 
                           // Aplicamos ambos filtros
                           final selectedUser =
@@ -241,7 +263,7 @@ class NotificationListScreen extends StatelessWidget {
                                           crossAxisCount: 3,
                                           mainAxisSpacing: 0,
                                           crossAxisSpacing: 12,
-                                          childAspectRatio: 1,
+                                          childAspectRatio: .85,
                                         ),
                                     itemCount: reminders.length,
                                     itemBuilder: (context, index) {

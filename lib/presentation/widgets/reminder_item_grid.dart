@@ -147,15 +147,6 @@ class ReminderItemGrid extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.all(Radius.circular(30)),
-                          child: Image.asset(
-                            sender.photo,
-                            height: 30,
-                            width: 30,
-                          ),
-                        ),
-                        SizedBox(width: 8),
                         Container(
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(4),
@@ -202,6 +193,8 @@ class ReminderItemGrid extends StatelessWidget {
                     padding: const EdgeInsets.only(bottom: 8),
                     child: Text(
                       projectObject.name,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         color: projectObject.id.isEmpty
                             ? Colors.grey
@@ -216,7 +209,20 @@ class ReminderItemGrid extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.only(bottom: 8),
                     child: SizedBox(
-                      height: 15 * 6,
+                      height:
+                          (projectObject.name.length > 25 &&
+                              receivers.length == 9)
+                          ? (15 * 3.75)
+                          : (projectObject.name.length < 25 &&
+                                receivers.length < 5)
+                          ? (15 * 9.5)
+                          : (projectObject.name.length > 25 &&
+                                    receivers.length > 4) ||
+                                (projectObject.name.length < 25 &&
+                                    receivers.length == 9)
+                          ? (15 * 5.5)
+                          : (15 * 7.75),
+
                       child: SingleChildScrollView(
                         child: Text(
                           reminder.content,
@@ -237,38 +243,33 @@ class ReminderItemGrid extends StatelessWidget {
                     child: Divider(),
                   ),
                   SizedBox(
-                    height: 30,
+                    //height: 30,
                     child: Row(
                       children: [
                         Expanded(
-                          child: ListView.builder(
+                          child: GridView.builder(
+                            gridDelegate:
+                                SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: 4,
+                                  mainAxisSpacing: 3,
+                                  crossAxisSpacing: 0,
+                                  childAspectRatio: 1.5,
+                                ),
                             shrinkWrap: true,
-                            itemCount: receivers.length > 4
-                                ? 5
-                                : receivers.length,
-                            scrollDirection: Axis.horizontal,
+                            itemCount: receivers.length,
                             padding: EdgeInsets.zero,
                             itemBuilder: (BuildContext context, int index) {
-                              return Padding(
-                                padding: EdgeInsets.only(right: 4),
-                                child: receivers.length > 4 && index == 4
-                                    ? Align(
-                                        alignment: Alignment.bottomCenter,
-                                        child: Text(
-                                          "...",
-                                          style: TextStyle(color: Colors.grey),
-                                        ),
-                                      )
-                                    : ClipRRect(
-                                        borderRadius: BorderRadius.all(
-                                          Radius.circular(30),
-                                        ),
-                                        child: Image.asset(
-                                          receivers[index].photo,
-                                          height: 30,
-                                          width: 30,
-                                        ),
-                                      ),
+                              return Center(
+                                child: SizedBox(
+                                  width: 30, // tamaño del círculo
+                                  height: 30,
+                                  child: ClipOval(
+                                    child: Image.asset(
+                                      receivers[index].photo,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                ),
                               );
                             },
                           ),

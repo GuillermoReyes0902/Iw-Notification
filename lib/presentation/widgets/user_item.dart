@@ -23,7 +23,12 @@ class UserItem extends StatelessWidget {
         children: [
           ClipRRect(
             borderRadius: BorderRadius.all(Radius.circular(200)),
-            child: Image.asset(user.photo, height: 100, width: 100),
+            child: Image.asset(
+              user.photo,
+              height: 100,
+              width: 100,
+              fit: BoxFit.cover,
+            ),
           ),
           SizedBox(height: 8),
           Text(
