@@ -9,26 +9,62 @@ import 'package:iwproject/firebase_options.dart';
 import 'package:iwproject/presentation/pages/notification_list_screen.dart';
 import 'package:iwproject/presentation/pages/user_login_screen.dart';
 import 'package:iwproject/utils/data.dart';
+import 'package:iwproject/utils/local_notification_service.dart';
 import 'package:provider/provider.dart';
 import 'presentation/providers/notification_provider.dart';
 import 'package:launch_at_startup/launch_at_startup.dart';
 //import 'package:iwproject/presentation/providers/reminder_listener_provider.dart';
 
-void main() async {
+/// BACKGROUND / TERMINATED HANDLER
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  print("BG MESSAGE: ${message.messageId}");
+}
+
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  // 1. Inicializar Firebase SIEMPRE antes de usar cualquier plugin de Firebase
+  if (Platform.isIOS || Platform.isAndroid || Platform.isMacOS) {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
 
-  if (Platform.isMacOS) {
-    FirebaseMessaging firebaseMessaging = FirebaseMessaging.instance;
-    var token = await firebaseMessaging.getToken();
-    print(token);
+    if (!Platform.isMacOS) {
+      await LocalNotificationService.init();
+    }
+
+    //BACKGROUND
+    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
+    /// FOREGROUND
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      print('[onMessage] message: $message');
+      print("FG MESSAGE: ${message.messageId}");
+      print("DATA: ${message.data}");
+      if (message.notification != null) {
+        print("NOTIF TITLE: ${message.notification!.title}");
+        print("NOTIF BODY: ${message.notification!.body}");
+      }
+      LocalNotificationService.show(message);
     });
-    FirebaseMessaging.onBackgroundMessage(onBackgroundMessage);
 
-    _launchAtStartupInit();
+    /// USER TAP → APP EN FOREGROUND O BACKGROUND
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+      print("USER TAPPED NOTIF");
+      print("DATA: ${message.data}");
+    });
+
+    // 2. Ahora sí: APNS token (solo después de initializeApp)
+    if (Platform.isIOS) {
+      final apnsToken = await FirebaseMessaging.instance.getAPNSToken();
+      print(apnsToken);
+    }
+
+    /// USER TAPP EN ESTADO TERMINATED
+    //_checkInitialMessage();
+  }
+  if (Platform.isMacOS || Platform.isWindows) {
+    await _launchAtStartupInit();
   }
 
   runApp(
@@ -40,11 +76,6 @@ void main() async {
       child: const MyApp(),
     ),
   );
-}
-
-Future<void> onBackgroundMessage(RemoteMessage message) {
-  print('[onBackgroundMessage] message: $message');
-  return Future.value();
 }
 
 _launchAtStartupInit() async {
@@ -73,13 +104,13 @@ class _MyAppState extends State<MyApp> {
     );
     final controller = context.read<NotificationProvider>();
 
-    users.get().then((querySnapshot) {
+    users.get().then((querySnapshot) async {
       final users = querySnapshot.docs.map((doc) {
         final data = doc.data();
         return UserModel.fromJson({ConstantData.userId: doc.id, ...data});
       }).toList();
-      controller.setUsers(users);
-      controller.getUser();
+      await controller.setUsers(users);
+      await controller.getUser();
     });
 
     //Cargar proyectos desde Firestore

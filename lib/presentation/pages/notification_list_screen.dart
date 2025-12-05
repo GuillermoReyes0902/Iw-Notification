@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:iwproject/domain/models/reminder_model.dart';
@@ -5,26 +6,27 @@ import 'package:iwproject/domain/models/user_model.dart';
 import 'package:iwproject/presentation/pages/message_sender_screen.dart';
 import 'package:iwproject/presentation/providers/notification_provider.dart';
 import 'package:iwproject/presentation/widgets/projects_dropdown.dart';
-//import 'package:iwproject/presentation/widgets/reminder_item.dart';
 import 'package:iwproject/presentation/widgets/reminder_item_grid.dart';
 import 'package:iwproject/presentation/widgets/users_dropdown.dart';
 import 'package:iwproject/utils/data.dart';
-
 import 'package:provider/provider.dart';
 import 'package:iwproject/utils/text_data.dart';
-//import 'package:iwproject/presentation/providers/reminder_listener_provider.dart';
 
-class NotificationListScreen extends StatelessWidget {
+class NotificationListScreen extends StatefulWidget {
   const NotificationListScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    //
-    // setInitialReminders(List<ReminderModel> reminders) {
-    //   final controllerReminders = context.read<ReminderListenerProvider>();
-    //   controllerReminders.setInitialReminders(reminders);
-    // }
+  State<NotificationListScreen> createState() => _NotificationListScreenState();
+}
 
+class _NotificationListScreenState extends State<NotificationListScreen> {
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     newReminderButton() {
       Navigator.push(
         context,
@@ -37,16 +39,17 @@ class NotificationListScreen extends StatelessWidget {
       controller.logOut();
     }
 
-    // final listener = context.read<ReminderListenerProvider>();
-    // final controllerNotification = context.read<NotificationProvider>();
-    // listener.startListening(context, controllerNotification.currentUser!.id);
-
     return Scaffold(
       backgroundColor: Colors.grey[100],
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: newReminderButton,
-        label: Text(TextData.newReminderButton),
-      ),
+      floatingActionButton: Platform.isWindows || Platform.isMacOS
+          ? FloatingActionButton.extended(
+              onPressed: newReminderButton,
+              label: Text(TextData.newReminderButton),
+            )
+          : FloatingActionButton(
+              onPressed: newReminderButton,
+              child: Icon(Icons.add),
+            ),
       appBar: AppBar(
         centerTitle: false,
         backgroundColor: Colors.transparent,
@@ -75,10 +78,10 @@ class NotificationListScreen extends StatelessWidget {
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 950),
             child: Padding(
-              padding: const EdgeInsets.only(
-                left: 24,
-                right: 24,
-                bottom: 24,
+              padding: EdgeInsets.only(
+                left: Platform.isWindows || Platform.isMacOS ? 24 : 12,
+                right: Platform.isWindows || Platform.isMacOS ? 24 : 12,
+                bottom: Platform.isWindows || Platform.isMacOS ? 24 : 12,
                 top: 8,
               ),
               child: Column(
@@ -123,47 +126,19 @@ class NotificationListScreen extends StatelessWidget {
                           ],
                         ),
 
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Row(
-                              children: [
-                                Text(
-                                  "Colaborador: ",
-                                  style: TextStyle(
-                                    color: Colors.grey[400]!,
-                                    fontSize: 14,
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: 300,
-                                  child: BasicUsersDropDown(),
-                                ),
-                              ],
-                            ),
-                            SizedBox(height: 8),
-                            Row(
-                              children: [
-                                Text(
-                                  "Proyecto: ",
-                                  style: TextStyle(
-                                    color: Colors.grey[400]!,
-                                    fontSize: 14,
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: 300,
-                                  child: BasicProjectDropdown(),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
+                        Platform.isWindows || Platform.isMacOS
+                            ? FiltersWidget()
+                            : SizedBox.shrink(),
                       ],
                     ),
                   ),
+                  Platform.isAndroid || Platform.isIOS
+                      ? Padding(
+                          padding: EdgeInsetsGeometry.symmetric(vertical: 12),
+                          child: FiltersWidget(),
+                        )
+                      : SizedBox(height: 8),
 
-                  const SizedBox(height: 8),
                   Consumer<NotificationProvider>(
                     builder: (context, controller, _) {
                       return StreamBuilder<QuerySnapshot>(
@@ -259,11 +234,19 @@ class NotificationListScreen extends StatelessWidget {
                                     padding: EdgeInsets.zero,
                                     shrinkWrap: true,
                                     gridDelegate:
-                                        const SliverGridDelegateWithFixedCrossAxisCount(
-                                          crossAxisCount: 3,
+                                        SliverGridDelegateWithFixedCrossAxisCount(
+                                          crossAxisCount:
+                                              Platform.isWindows ||
+                                                  Platform.isMacOS
+                                              ? 3
+                                              : 2,
                                           mainAxisSpacing: 0,
                                           crossAxisSpacing: 12,
-                                          childAspectRatio: .85,
+                                          childAspectRatio:
+                                              Platform.isWindows ||
+                                                  Platform.isMacOS
+                                              ? 0.85
+                                              : 0.55,
                                         ),
                                     itemCount: reminders.length,
                                     itemBuilder: (context, index) {
@@ -289,6 +272,42 @@ class NotificationListScreen extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class FiltersWidget extends StatelessWidget {
+  const FiltersWidget({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        Row(
+          children: [
+            Text(
+              "Colaborador: ",
+              style: TextStyle(color: Colors.grey[400]!, fontSize: 14),
+            ),
+            Platform.isWindows || Platform.isMacOS
+                ? SizedBox(width: 300, child: BasicUsersDropDown())
+                : Expanded(child: BasicUsersDropDown()),
+          ],
+        ),
+        SizedBox(height: 8),
+        Row(
+          children: [
+            Text(
+              "Proyecto: ",
+              style: TextStyle(color: Colors.grey[400]!, fontSize: 14),
+            ),
+            Platform.isWindows || Platform.isMacOS
+                ? SizedBox(width: 300, child: BasicProjectDropdown())
+                : Expanded(child: BasicProjectDropdown()),
+          ],
+        ),
+      ],
     );
   }
 }

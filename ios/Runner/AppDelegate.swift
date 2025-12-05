@@ -7,6 +7,8 @@ import UIKit
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
+    // 🔥 NECESARIO PARA MOSTRAR NOTIFICACIONES EN FOREGROUND
+    UNUserNotificationCenter.current().delegate = self
     GeneratedPluginRegistrant.register(with: self)
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }

@@ -49,21 +49,7 @@ class NotificationProvider with ChangeNotifier {
   Future<void> logIn(UserModel selectedUser) async {
     await SharedPreferencesHandler.setUser(selectedUser);
     currentUser = selectedUser;
-    if (Platform.isMacOS) {
-      FirebaseMessaging firebaseMessaging = FirebaseMessaging.instance;
-      var token = await firebaseMessaging.getToken();
-      print(token);
-      // Map<String, dynamic> body = AccessRequest(
-      //   userId: selectedUser.id,
-      //   fcmToken: token!,
-      // ).toJson();
-      // print(body);
-      // await NetworkHandler.post(
-      //   url: Endpoints.access,
-      //   body: body,
-      //   requiereAuth: false,
-      // );
-    }
+    await firebaseVerification();
     notifyListeners();
   }
 
@@ -73,19 +59,46 @@ class NotificationProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  Future<bool> firebaseVerification() async {
+    if (Platform.isIOS || Platform.isAndroid || Platform.isMacOS) {
+      print("- - - - - here");
+      final FirebaseMessaging firebaseMessaging = FirebaseMessaging.instance;
+      await firebaseMessaging.requestPermission();
+      final fCMToken = await firebaseMessaging.getToken();
+      print('Token: $fCMToken');
+      if (fCMToken != null) {
+        print('Before FCM Tokens:; ${currentUser!.fcmTokens}');
+        if (!currentUser!.fcmTokens.contains(fCMToken)) {
+          currentUser!.fcmTokens.add(fCMToken);
+          //actualizo remoto
+          await FirebaseFirestore.instance
+              .collection(ConstantData.userCollection)
+              .doc(currentUser!.id)
+              .update({ConstantData.fcmTokens: currentUser!.fcmTokens});
+          //actualizo local
+          await SharedPreferencesHandler.updateUser(currentUser!);
+          print('After FCM Tokens: ${currentUser!.fcmTokens}');
+        }
+      }
+    }
+    return true;
+  }
+
   Future<bool> getUser() async {
     final user = await SharedPreferencesHandler.getUser();
     if (user != null) {
       currentUser = user;
+      await firebaseVerification();
       notifyListeners();
       return true;
     }
     return false;
   }
 
-  void setUsers(List<UserModel> newUsers) {
+  Future<void> setUsers(List<UserModel> newUsers) async {
     users = newUsers;
     notifyListeners();
+    return;
   }
 
   void setProjects(List<ProjectModel> newProjects) {

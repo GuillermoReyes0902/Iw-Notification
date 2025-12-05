@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:iwproject/presentation/widgets/projects_dropdown.dart';
 import 'package:iwproject/utils/data.dart';
@@ -23,6 +25,88 @@ class MessageSenderScreen extends StatelessWidget {
     if (success && context.mounted) {
       goToNotificationList(context);
     }
+  }
+
+  _formSection(NotificationProvider controller, BuildContext context) {
+    return [
+      Row(
+        children: [
+          const Text(
+            TextData.deadline,
+            style: TextStyle(fontWeight: FontWeight.w600),
+          ),
+          Expanded(
+            child: GestureDetector(
+              onTap: () async {
+                await showDatePicker(
+                  context: context,
+                  initialDate: ConstantData.onlyDateFormat.parse(
+                    controller.deadlineCtrl.text,
+                  ),
+                  firstDate: DateTime.now(),
+                  lastDate: DateTime(2100),
+                ).then((selectedDate) {
+                  if (selectedDate is DateTime) {
+                    controller.setDeadline(selectedDate);
+                  }
+                });
+              },
+              child: AbsorbPointer(
+                child: TextFormField(
+                  readOnly: true,
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  controller: controller.deadlineCtrl,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+      const SizedBox(height: 8, width: 8),
+      Row(
+        children: [
+          const Text(
+            TextData.priority,
+            style: TextStyle(fontWeight: FontWeight.w600),
+          ),
+          Expanded(
+            child: DropdownButtonFormField<String>(
+              value: controller.priority,
+              style: TextStyle(
+                color:
+                    TextData.priorityColors[controller.priority ?? "Baja"] ??
+                    Colors.black,
+                fontWeight: FontWeight.w600,
+              ),
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(8)),
+                ),
+              ),
+              items: TextData.priorityList.map((priority) {
+                return DropdownMenuItem<String>(
+                  value: priority,
+                  child: Text(
+                    priority,
+                    style: TextStyle(
+                      color: TextData.priorityColors[priority] ?? Colors.black,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                );
+              }).toList(),
+              onChanged: (value) => controller.setPriority(value!),
+              validator: (value) =>
+                  (value == null) ? TextData.priorityValidator : null,
+            ),
+          ),
+        ],
+      ),
+    ];
   }
 
   @override
@@ -75,7 +159,9 @@ class MessageSenderScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Padding(
-                    padding: const EdgeInsets.all(24),
+                    padding: EdgeInsets.all(
+                      Platform.isWindows || Platform.isMacOS ? 24 : 12,
+                    ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -149,106 +235,129 @@ class MessageSenderScreen extends StatelessWidget {
                                         : null,
                                   ),
                                   const SizedBox(height: 16),
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceEvenly,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    children: [
-                                      const Text(
-                                        TextData.deadline,
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                      Expanded(
-                                        child: GestureDetector(
-                                          onTap: () async {
-                                            await showDatePicker(
-                                              context: context,
-                                              initialDate: ConstantData
-                                                  .onlyDateFormat
-                                                  .parse(
-                                                    controller
-                                                        .deadlineCtrl
-                                                        .text,
+                                  Platform.isWindows || Platform.isMacOS
+                                      ? Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceEvenly,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.center,
+                                          children: [
+                                            const Text(
+                                              TextData.deadline,
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                            ),
+                                            Expanded(
+                                              child: GestureDetector(
+                                                onTap: () async {
+                                                  await showDatePicker(
+                                                    context: context,
+                                                    initialDate: ConstantData
+                                                        .onlyDateFormat
+                                                        .parse(
+                                                          controller
+                                                              .deadlineCtrl
+                                                              .text,
+                                                        ),
+                                                    firstDate: DateTime.now(),
+                                                    lastDate: DateTime(2100),
+                                                  ).then((selectedDate) {
+                                                    if (selectedDate
+                                                        is DateTime) {
+                                                      controller.setDeadline(
+                                                        selectedDate,
+                                                      );
+                                                    }
+                                                  });
+                                                },
+                                                child: AbsorbPointer(
+                                                  child: TextFormField(
+                                                    readOnly: true,
+                                                    decoration: InputDecoration(
+                                                      border: OutlineInputBorder(
+                                                        borderRadius:
+                                                            BorderRadius.circular(
+                                                              8,
+                                                            ),
+                                                      ),
+                                                    ),
+                                                    controller:
+                                                        controller.deadlineCtrl,
                                                   ),
-                                              firstDate: DateTime.now(),
-                                              lastDate: DateTime(2100),
-                                            ).then((selectedDate) {
-                                              if (selectedDate is DateTime) {
-                                                controller.setDeadline(
-                                                  selectedDate,
-                                                );
-                                              }
-                                            });
-                                          },
-                                          child: AbsorbPointer(
-                                            child: TextFormField(
-                                              readOnly: true,
-                                              decoration: InputDecoration(
-                                                border: OutlineInputBorder(
-                                                  borderRadius:
-                                                      BorderRadius.circular(8),
                                                 ),
                                               ),
-                                              controller:
-                                                  controller.deadlineCtrl,
                                             ),
-                                          ),
-                                        ),
-                                      ),
-                                      const Text(
-                                        TextData.priority,
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                      Expanded(
-                                        child: DropdownButtonFormField<String>(
-                                          value: controller.priority,
-                                          style: TextStyle(
-                                            color:
-                                                TextData
-                                                    .priorityColors[controller
-                                                        .priority ??
-                                                    "Baja"] ??
-                                                Colors.black,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                          decoration: const InputDecoration(
-                                            border: OutlineInputBorder(
-                                              borderRadius: BorderRadius.all(
-                                                Radius.circular(8),
+                                            const SizedBox(height: 8, width: 8),
+                                            const Text(
+                                              TextData.priority,
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.w600,
                                               ),
                                             ),
-                                          ),
-                                          items: TextData.priorityList.map((
-                                            priority,
-                                          ) {
-                                            return DropdownMenuItem<String>(
-                                              value: priority,
-                                              child: Text(
-                                                priority,
+                                            Expanded(
+                                              child: DropdownButtonFormField<String>(
+                                                value: controller.priority,
                                                 style: TextStyle(
                                                   color:
                                                       TextData
-                                                          .priorityColors[priority] ??
+                                                          .priorityColors[controller
+                                                              .priority ??
+                                                          "Baja"] ??
                                                       Colors.black,
                                                   fontWeight: FontWeight.w600,
                                                 ),
+                                                decoration:
+                                                    const InputDecoration(
+                                                      border: OutlineInputBorder(
+                                                        borderRadius:
+                                                            BorderRadius.all(
+                                                              Radius.circular(
+                                                                8,
+                                                              ),
+                                                            ),
+                                                      ),
+                                                    ),
+                                                items: TextData.priorityList.map((
+                                                  priority,
+                                                ) {
+                                                  return DropdownMenuItem<
+                                                    String
+                                                  >(
+                                                    value: priority,
+                                                    child: Text(
+                                                      priority,
+                                                      style: TextStyle(
+                                                        color:
+                                                            TextData
+                                                                .priorityColors[priority] ??
+                                                            Colors.black,
+                                                        fontWeight:
+                                                            FontWeight.w600,
+                                                      ),
+                                                    ),
+                                                  );
+                                                }).toList(),
+                                                onChanged: (value) => controller
+                                                    .setPriority(value!),
+                                                validator: (value) =>
+                                                    (value == null)
+                                                    ? TextData.priorityValidator
+                                                    : null,
                                               ),
-                                            );
-                                          }).toList(),
-                                          onChanged: (value) =>
-                                              controller.setPriority(value!),
-                                          validator: (value) => (value == null)
-                                              ? TextData.priorityValidator
-                                              : null,
+                                            ),
+                                          ],
+                                        )
+                                      : Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceEvenly,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.center,
+                                          children: _formSection(
+                                            controller,
+                                            context,
+                                          ),
                                         ),
-                                      ),
-                                    ],
-                                  ),
                                   const SizedBox(height: 24),
                                   SizedBox(
                                     width: double.infinity,

@@ -46,6 +46,7 @@ class TextData {
   static const String projectValidator = "Proyecto vacío";
   static const String priorityValidator = "Prioridad vacía";
   static const String deadline = "Fecha límite  ";
+  static const String deadlineMobile = "Fecha\nlímite  ";
   static const String priority = "  Prioridad  ";
   static const List<String> priorityList = ["Baja", "Intermedia", "Alta"];
   static const String content = "Contenido del recordatorio";

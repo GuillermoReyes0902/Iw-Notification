@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:iwproject/domain/models/project_model.dart';
@@ -73,7 +75,12 @@ class ReminderItemGrid extends StatelessWidget {
 
               final sender = controller.users.firstWhere(
                 (user) => user.id == reminder.senderId,
-                orElse: () => UserModel(id: '', name: 'Desconocido', photo: ''),
+                orElse: () => UserModel(
+                  id: '',
+                  name: 'Desconocido',
+                  photo: '',
+                  fcmTokens: [],
+                ),
               );
 
               final receivers = controller.users
@@ -253,7 +260,10 @@ class ReminderItemGrid extends StatelessWidget {
                                   crossAxisCount: 4,
                                   mainAxisSpacing: 3,
                                   crossAxisSpacing: 0,
-                                  childAspectRatio: 1.5,
+                                  childAspectRatio:
+                                      Platform.isWindows || Platform.isMacOS
+                                      ? 1.5
+                                      : 1,
                                 ),
                             shrinkWrap: true,
                             itemCount: receivers.length,

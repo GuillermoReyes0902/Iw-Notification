@@ -7,16 +7,16 @@ class UserItem extends StatelessWidget {
   const UserItem({super.key, required this.user});
 
   final UserModel user;
+  Future<void> loginUser(UserModel selectedUser, BuildContext context) async {
+    final controller = context.read<NotificationProvider>();
+    await controller.logIn(selectedUser);
+    return;
+  }
 
   @override
   Widget build(BuildContext context) {
-    void loginUser(UserModel selectedUser) {
-      final controller = context.read<NotificationProvider>();
-      controller.logIn(selectedUser);
-    }
-
     return GestureDetector(
-      onTap: () => loginUser(user),
+      onTap: () async => await loginUser(user, context),
       child: Column(
         mainAxisSize: MainAxisSize.max,
         mainAxisAlignment: MainAxisAlignment.center,
@@ -33,6 +33,9 @@ class UserItem extends StatelessWidget {
           SizedBox(height: 8),
           Text(
             user.name,
+            maxLines: 1,
+            textAlign: TextAlign.center,
+            overflow: TextOverflow.ellipsis,
             style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 18,

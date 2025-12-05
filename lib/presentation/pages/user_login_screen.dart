@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:iwproject/domain/models/user_model.dart';
 import 'package:iwproject/presentation/providers/notification_provider.dart';
@@ -25,10 +27,10 @@ class UserLoginScreen extends StatelessWidget {
                 ),
                 child: Padding(
                   padding: EdgeInsetsGeometry.only(
-                    top: 24,
-                    right: 24,
-                    left: 24,
-                    bottom: 48,
+                    top: Platform.isWindows || Platform.isMacOS ? 24 : 12,
+                    right: Platform.isWindows || Platform.isMacOS ? 24 : 12,
+                    left: Platform.isWindows || Platform.isMacOS ? 24 : 12,
+                    bottom: Platform.isWindows || Platform.isMacOS ? 48 : 24,
                   ),
                   child: Column(
                     children: [
@@ -47,11 +49,14 @@ class UserLoginScreen extends StatelessWidget {
                             physics: NeverScrollableScrollPhysics(),
                             shrinkWrap: true,
                             gridDelegate:
-                                const SliverGridDelegateWithFixedCrossAxisCount(
+                                SliverGridDelegateWithFixedCrossAxisCount(
                                   crossAxisCount: 3,
                                   mainAxisSpacing: 8,
                                   crossAxisSpacing: 8,
-                                  childAspectRatio: 1.25,
+                                  childAspectRatio:
+                                      Platform.isWindows || Platform.isMacOS
+                                      ? 1.25
+                                      : 0.65,
                                 ),
                             itemCount: users.length,
                             itemBuilder: (BuildContext context, int index) {
