@@ -2,7 +2,7 @@
 package="com.iwlabs.reminder">
 <uses-permission android:name="android.permission.INTERNET" />
     <application
-        android:label="iwproject"
+        android:label="iW Reminder"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

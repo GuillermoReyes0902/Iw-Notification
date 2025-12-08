@@ -14,7 +14,11 @@ class LocalNotificationService {
       requestSoundPermission: true,
     );
 
-    const settings = InitializationSettings(android: android, iOS: ios);
+    const settings = InitializationSettings(
+      android: android,
+      iOS: ios,
+      macOS: ios,
+    );
 
     await _plugin.initialize(settings);
   }
@@ -32,6 +36,7 @@ class LocalNotificationService {
     const notificationDetails = NotificationDetails(
       android: androidDetails,
       iOS: iosDetails,
+      macOS: iosDetails,
     );
 
     await _plugin.show(

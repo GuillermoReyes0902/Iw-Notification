@@ -49,8 +49,9 @@ class NotificationProvider with ChangeNotifier {
   Future<void> logIn(UserModel selectedUser) async {
     await SharedPreferencesHandler.setUser(selectedUser);
     currentUser = selectedUser;
-    await firebaseVerification();
     notifyListeners();
+    await firebaseVerification();
+    return;
   }
 
   Future<void> logOut() async {
@@ -84,26 +85,14 @@ class NotificationProvider with ChangeNotifier {
     return true;
   }
 
-  Future<bool> getUser() async {
+  Future<UserModel?> getUser() async {
     final user = await SharedPreferencesHandler.getUser();
     if (user != null) {
       currentUser = user;
-      await firebaseVerification();
       notifyListeners();
-      return true;
+      return currentUser;
     }
-    return false;
-  }
-
-  Future<void> setUsers(List<UserModel> newUsers) async {
-    users = newUsers;
-    notifyListeners();
-    return;
-  }
-
-  void setProjects(List<ProjectModel> newProjects) {
-    projects = newProjects;
-    notifyListeners();
+    return null;
   }
 
   Future<ProjectModel?> addProject(String projectName) async {
@@ -253,5 +242,39 @@ class NotificationProvider with ChangeNotifier {
       final matchMultiple = r.receiversIds.contains(user.id);
       return matchSingle || matchMultiple;
     }).toList();
+  }
+
+  Future<void> getUsers() async {
+    final usersData = FirebaseFirestore.instance.collection(
+      ConstantData.userCollection,
+    );
+
+    await usersData.get().then((querySnapshot) async {
+      final usersData = querySnapshot.docs.map((doc) {
+        final data = doc.data();
+        return UserModel.fromJson({ConstantData.userId: doc.id, ...data});
+      }).toList();
+      users = usersData;
+      notifyListeners();
+    });
+
+    return;
+  }
+
+  Future<void> getProjects() async {
+    final projectsData = FirebaseFirestore.instance.collection(
+      ConstantData.projectCollection,
+    );
+
+    await projectsData.get().then((querySnapshot) {
+      final projectsData = querySnapshot.docs.map((doc) {
+        final data = doc.data();
+        return ProjectModel.fromJson({ConstantData.projectId: doc.id, ...data});
+      }).toList();
+      projects = projectsData;
+      notifyListeners();
+    });
+
+    return;
   }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:iwproject/domain/models/user_model.dart';
+import 'package:iwproject/presentation/pages/notification_list_screen.dart';
 import 'package:iwproject/presentation/providers/notification_provider.dart';
 import 'package:provider/provider.dart';
 
@@ -9,8 +10,12 @@ class UserItem extends StatelessWidget {
   final UserModel user;
   Future<void> loginUser(UserModel selectedUser, BuildContext context) async {
     final controller = context.read<NotificationProvider>();
-    await controller.logIn(selectedUser);
-    return;
+    await controller.logIn(selectedUser).then((_) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => NotificationListScreen()),
+      );
+    });
   }
 
   @override
