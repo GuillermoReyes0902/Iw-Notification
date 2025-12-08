@@ -1,34 +1,63 @@
 import 'dart:io';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:iwproject/domain/models/project_model.dart';
-import 'package:iwproject/domain/models/user_model.dart';
 import 'package:iwproject/firebase_options.dart';
-import 'package:iwproject/presentation/pages/notification_list_screen.dart';
-import 'package:iwproject/presentation/pages/user_login_screen.dart';
-import 'package:iwproject/utils/data.dart';
+import 'package:iwproject/presentation/pages/splash_screen.dart';
+import 'package:iwproject/utils/local_notification_service.dart';
 import 'package:provider/provider.dart';
 import 'presentation/providers/notification_provider.dart';
 import 'package:launch_at_startup/launch_at_startup.dart';
-//import 'package:iwproject/presentation/providers/reminder_listener_provider.dart';
 
-void main() async {
+/// BACKGROUND / TERMINATED HANDLER
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  print("BG MESSAGE: ${message.messageId}");
+}
+
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  // 1. Inicializar Firebase SIEMPRE antes de usar cualquier plugin de Firebase
+  if (Platform.isIOS || Platform.isAndroid || Platform.isMacOS) {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
 
-  if (Platform.isMacOS) {
-    FirebaseMessaging firebaseMessaging = FirebaseMessaging.instance;
-    var token = await firebaseMessaging.getToken();
-    print(token);
+    //Inicializar notificaciones locales
+    await LocalNotificationService.init();
+
+    //BACKGROUND
+    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
+    /// FOREGROUND
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      print('[onMessage] message: $message');
+      print("FG MESSAGE: ${message.messageId}");
+      print("DATA: ${message.data}");
+      if (message.notification != null) {
+        print("NOTIF TITLE: ${message.notification!.title}");
+        print("NOTIF BODY: ${message.notification!.body}");
+      }
+      LocalNotificationService.show(message);
     });
-    FirebaseMessaging.onBackgroundMessage(onBackgroundMessage);
 
-    _launchAtStartupInit();
+    /// USER TAP → APP EN FOREGROUND O BACKGROUND
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+      print("USER TAPPED NOTIF");
+      print("DATA: ${message.data}");
+    });
+
+    // 2. Ahora sí: APNS token (solo después de initializeApp)
+    if (Platform.isIOS || Platform.isMacOS) {
+      final apnsToken = await FirebaseMessaging.instance.getAPNSToken();
+      print(apnsToken);
+    }
+
+    /// USER TAPP EN ESTADO TERMINATED
+    //_checkInitialMessage();
+  }
+  if (Platform.isMacOS || Platform.isWindows) {
+    await _launchAtStartupInit();
   }
 
   runApp(
@@ -40,11 +69,6 @@ void main() async {
       child: const MyApp(),
     ),
   );
-}
-
-Future<void> onBackgroundMessage(RemoteMessage message) {
-  print('[onBackgroundMessage] message: $message');
-  return Future.value();
 }
 
 _launchAtStartupInit() async {
@@ -66,50 +90,7 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   @override
-  void initState() {
-    //Cargar usuarios desde Firestore
-    final users = FirebaseFirestore.instance.collection(
-      ConstantData.userCollection,
-    );
-    final controller = context.read<NotificationProvider>();
-
-    users.get().then((querySnapshot) {
-      final users = querySnapshot.docs.map((doc) {
-        final data = doc.data();
-        return UserModel.fromJson({ConstantData.userId: doc.id, ...data});
-      }).toList();
-      controller.setUsers(users);
-      controller.getUser();
-    });
-
-    //Cargar proyectos desde Firestore
-    final projects = FirebaseFirestore.instance.collection(
-      ConstantData.projectCollection,
-    );
-
-    projects.get().then((querySnapshot) {
-      final projects = querySnapshot.docs.map((doc) {
-        final data = doc.data();
-        return ProjectModel.fromJson({ConstantData.projectId: doc.id, ...data});
-      }).toList();
-      controller.setProjects(projects);
-    });
-
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: Selector<NotificationProvider, UserModel?>(
-        selector: (_, controller) => controller.currentUser,
-        builder: (_, currentUser, _) {
-          return currentUser != null
-              ? NotificationListScreen()
-              : UserLoginScreen();
-        },
-      ),
-    );
+    return MaterialApp(debugShowCheckedModeBanner: false, home: SplashScreen());
   }
 }

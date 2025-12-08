@@ -64,14 +64,14 @@ class ConstantData {
 
   // ---------------- MÉTODOS ----------------
   static DateFormat dateFormat = DateFormat('dd/MM/yyyy\nhh:mm');
-  static DateFormat onlyDateFormat = DateFormat('dd/MM/yyyy');
+  static DateFormat onlyDateFormat = DateFormat('dd/MM/yy');
   static DateFormat dateGridFormat = DateFormat('dd/MM');
   static const String defaultUserImage =
       'https://www.shutterstock.com/image-vector/blank-avatar-photo-place-holder-600nw-1095249842.jpg';
 
   //COLECCIONES
-  static const String reminderCollection = "reminders";
-  //static const String reminderCollection = "reminders_dev";
+  //static const String reminderCollection = "reminders";
+  static const String reminderCollection = "reminders_dev";
   static const String userCollection = "users";
   static const String projectCollection = "projects";
 
@@ -92,6 +92,7 @@ class ConstantData {
   static const String userId = "id";
   static const String userName = "name";
   static const String userPhoto = "photo";
+  static const String fcmTokens = "fcmTokens";
 
   //ATRIBUTOS PROYECTO
   static const String projectId = "id";

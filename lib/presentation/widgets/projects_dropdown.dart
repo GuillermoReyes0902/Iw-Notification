@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:iwproject/domain/models/project_model.dart';
@@ -231,11 +233,18 @@ class BasicProjectDropdown extends StatelessWidget {
             value: null,
             child: Row(
               children: [
-                Icon(Icons.apps, size: 14, color: Colors.grey[400]!),
+                Icon(
+                  Icons.apps,
+                  size: Platform.isWindows || Platform.isMacOS ? 14 : 16,
+                  color: Colors.grey[400]!,
+                ),
                 SizedBox(width: 6),
                 Text(
                   TextData.all,
-                  style: TextStyle(color: Colors.grey[400]!, fontSize: 12),
+                  style: TextStyle(
+                    color: Colors.grey[400]!,
+                    fontSize: Platform.isWindows || Platform.isMacOS ? 12 : 14,
+                  ),
                 ),
               ],
             ),
@@ -250,7 +259,9 @@ class BasicProjectDropdown extends StatelessWidget {
                 width: 250, // ajusta el ancho máximo del texto
                 child: Text(
                   project.name,
-                  style: const TextStyle(fontSize: 12),
+                  style: TextStyle(
+                    fontSize: Platform.isWindows || Platform.isMacOS ? 12 : 14,
+                  ),
                   overflow: TextOverflow.ellipsis,
                   maxLines: 1,
                 ),
@@ -260,7 +271,7 @@ class BasicProjectDropdown extends StatelessWidget {
         );
 
         return SizedBox(
-          height: 45,
+          height: Platform.isWindows || Platform.isMacOS ? 45 : 50,
           child: DropdownButtonFormField<ProjectModel>(
             iconEnabledColor: Colors.grey[400]!,
             value: controller.selectedProject,

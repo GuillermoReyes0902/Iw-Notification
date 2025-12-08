@@ -49,22 +49,9 @@ class NotificationProvider with ChangeNotifier {
   Future<void> logIn(UserModel selectedUser) async {
     await SharedPreferencesHandler.setUser(selectedUser);
     currentUser = selectedUser;
-    if (Platform.isMacOS) {
-      FirebaseMessaging firebaseMessaging = FirebaseMessaging.instance;
-      var token = await firebaseMessaging.getToken();
-      print(token);
-      // Map<String, dynamic> body = AccessRequest(
-      //   userId: selectedUser.id,
-      //   fcmToken: token!,
-      // ).toJson();
-      // print(body);
-      // await NetworkHandler.post(
-      //   url: Endpoints.access,
-      //   body: body,
-      //   requiereAuth: false,
-      // );
-    }
     notifyListeners();
+    await firebaseVerification();
+    return;
   }
 
   Future<void> logOut() async {
@@ -73,24 +60,39 @@ class NotificationProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<bool> getUser() async {
+  Future<bool> firebaseVerification() async {
+    if (Platform.isIOS || Platform.isAndroid || Platform.isMacOS) {
+      print("- - - - - here");
+      final FirebaseMessaging firebaseMessaging = FirebaseMessaging.instance;
+      await firebaseMessaging.requestPermission();
+      final fCMToken = await firebaseMessaging.getToken();
+      print('Token: $fCMToken');
+      if (fCMToken != null) {
+        print('Before FCM Tokens:; ${currentUser!.fcmTokens}');
+        if (!currentUser!.fcmTokens.contains(fCMToken)) {
+          currentUser!.fcmTokens.add(fCMToken);
+          //actualizo remoto
+          await FirebaseFirestore.instance
+              .collection(ConstantData.userCollection)
+              .doc(currentUser!.id)
+              .update({ConstantData.fcmTokens: currentUser!.fcmTokens});
+          //actualizo local
+          await SharedPreferencesHandler.updateUser(currentUser!);
+          print('After FCM Tokens: ${currentUser!.fcmTokens}');
+        }
+      }
+    }
+    return true;
+  }
+
+  Future<UserModel?> getUser() async {
     final user = await SharedPreferencesHandler.getUser();
     if (user != null) {
       currentUser = user;
       notifyListeners();
-      return true;
+      return currentUser;
     }
-    return false;
-  }
-
-  void setUsers(List<UserModel> newUsers) {
-    users = newUsers;
-    notifyListeners();
-  }
-
-  void setProjects(List<ProjectModel> newProjects) {
-    projects = newProjects;
-    notifyListeners();
+    return null;
   }
 
   Future<ProjectModel?> addProject(String projectName) async {
@@ -240,5 +242,39 @@ class NotificationProvider with ChangeNotifier {
       final matchMultiple = r.receiversIds.contains(user.id);
       return matchSingle || matchMultiple;
     }).toList();
+  }
+
+  Future<void> getUsers() async {
+    final usersData = FirebaseFirestore.instance.collection(
+      ConstantData.userCollection,
+    );
+
+    await usersData.get().then((querySnapshot) async {
+      final usersData = querySnapshot.docs.map((doc) {
+        final data = doc.data();
+        return UserModel.fromJson({ConstantData.userId: doc.id, ...data});
+      }).toList();
+      users = usersData;
+      notifyListeners();
+    });
+
+    return;
+  }
+
+  Future<void> getProjects() async {
+    final projectsData = FirebaseFirestore.instance.collection(
+      ConstantData.projectCollection,
+    );
+
+    await projectsData.get().then((querySnapshot) {
+      final projectsData = querySnapshot.docs.map((doc) {
+        final data = doc.data();
+        return ProjectModel.fromJson({ConstantData.projectId: doc.id, ...data});
+      }).toList();
+      projects = projectsData;
+      notifyListeners();
+    });
+
+    return;
   }
 }

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:iwproject/domain/models/user_model.dart';
 import 'package:iwproject/presentation/providers/notification_provider.dart';
@@ -18,11 +20,18 @@ class BasicUsersDropDown extends StatelessWidget {
             value: null,
             child: Row(
               children: [
-                Icon(Icons.group, size: 14, color: Colors.grey[400]!),
+                Icon(
+                  Icons.group,
+                  size: Platform.isWindows || Platform.isMacOS ? 14 : 16,
+                  color: Colors.grey[400]!,
+                ),
                 SizedBox(width: 6),
                 Text(
                   TextData.all,
-                  style: TextStyle(color: Colors.grey[400]!, fontSize: 12),
+                  style: TextStyle(
+                    color: Colors.grey[400]!,
+                    fontSize: Platform.isWindows || Platform.isMacOS ? 12 : 14,
+                  ),
                 ),
               ],
             ),
@@ -33,13 +42,18 @@ class BasicUsersDropDown extends StatelessWidget {
           controller.users.map(
             (user) => DropdownMenuItem<UserModel>(
               value: user,
-              child: Text(user.name, style: const TextStyle(fontSize: 12)),
+              child: Text(
+                user.name,
+                style: TextStyle(
+                  fontSize: Platform.isWindows || Platform.isMacOS ? 12 : 14,
+                ),
+              ),
             ),
           ),
         );
 
         return SizedBox(
-          height: 45,
+          height: Platform.isWindows || Platform.isMacOS ? 45 : 50,
           child: DropdownButtonFormField<UserModel>(
             iconEnabledColor: Colors.grey[400]!,
             isDense: true,
